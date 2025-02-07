@@ -9,11 +9,11 @@ import PlaceOrder from "./pages/PlaceOrder";
 import Product from "./pages/product";
 import Order from "./pages/Order";
 import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
 function App() {
   return (
-    <div className=" px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw]   ">
+    <div className=" flex justify-between flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen   ">
       <NavBar />
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/collection" element={<Collection />} />
@@ -25,6 +25,7 @@ function App() {
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/orders" element={<Order />} />
       </Routes>
+      <Footer/>
     </div>
   );
 }
