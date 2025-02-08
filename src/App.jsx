@@ -12,7 +12,7 @@ import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 function App() {
   return (
-    <div className=" flex justify-between flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen   ">
+    <div className=" flex  flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen   ">
       <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
