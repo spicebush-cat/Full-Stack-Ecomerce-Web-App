@@ -10,10 +10,12 @@ import Product from "./pages/product";
 import Order from "./pages/Order";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
+import SearchBar from "./components/SearchBar";
 function App() {
   return (
     <div className=" flex  flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen   ">
       <NavBar />
+      <SearchBar/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/collection" element={<Collection />} />

@@ -1,11 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-import { use } from "react";
+
 import ProductItem from "../components/ProductItem";
 
 function Collection() {
+  const { search, setSearch } = useContext(ShopContext);
   const [productsSplit, setProductsSplit] = useState([]);
   const [filterProducts, setFilterProduct] = useState([]);
+
+  useEffect(() => {
+    //if it empty
+    if (!search.trim) {
+      setFilterProduct(productsSplit);
+    } else {
+      const filtred = productsSplit.filter(
+        (p) => p.name && p.name.toLowerCase().includes(search.toLowerCase())
+      );
+      setFilterProduct(filtred)
+    }
+  }, [search]);
+
   useEffect(() => {
     setProductsSplit(products.slice(2));
   }, []);
@@ -30,8 +44,8 @@ function Collection() {
     );
     const filterd =
       ActiveSubCategory.length === 0
-        ? productsSplit
-        : productsSplit.filter((p) =>
+        ? filterProducts
+        : filterProducts.filter((p) =>
             ActiveSubCategory.includes(p.subCategory)
           );
     setFilterProduct(filterd);
@@ -60,10 +74,21 @@ function Collection() {
         : productsSplit.filter((p) => activeCategory.includes(p.category));
     setFilterProduct(filterd);
   };
-//sort 
+  //sort ficheur
   const [selectSortBy, setSelectSortBy] = useState("");
   const handelSelectSortBy = (e) => {
-    selectSortBy(e.target.value);
+    setSelectSortBy(e.target.value);
+    if (e.target.value === "Low to High") {
+      const ascendingsorted = filterProducts
+        .slice()
+        .sort((a, b) => a.price - b.price);
+      setFilterProduct(ascendingsorted);
+    } else if (e.target.value === "High to Low") {
+      const desascendingsorted = filterProducts
+        .slice()
+        .sort((a, b) => b.price - a.price);
+      setFilterProduct(desascendingsorted);
+    }
   };
   return (
     <div className="grid grid-row sm:grid-cols-[1fr_2fr] md:grid-cols-[1fr_3fr] pb-[200px] pt-10 gap-8">
@@ -144,6 +169,7 @@ function Collection() {
             </p>
             <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
           </div>
+          {/* //sortfecheur */}
           <div className="border-2  py-2 px-4 ">
             <label htmlFor="sort">sort by : </label>
             <select
