@@ -24,7 +24,7 @@ function App() {
         <Route path="/card" element={<Card />} />
         <Route path="/login" element={<Login />} />
         <Route path="/place-order" element={<PlaceOrder />} />
-        <Route path="/product/:productId" element={<Product />} />
+        <Route path="/product/:prodId" element={<Product />} />
         <Route path="/orders" element={<Order />} />
       </Routes>
       <Footer/>

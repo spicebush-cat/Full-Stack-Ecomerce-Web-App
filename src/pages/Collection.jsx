@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-
 import ProductItem from "../components/ProductItem";
 
 function Collection() {
@@ -16,13 +15,14 @@ function Collection() {
       const filtred = productsSplit.filter(
         (p) => p.name && p.name.toLowerCase().includes(search.toLowerCase())
       );
-      setFilterProduct(filtred)
+      setFilterProduct(filtred);
     }
   }, [search]);
 
   useEffect(() => {
     setProductsSplit(products.slice(2));
   }, []);
+  
   console.log(productsSplit);
   useEffect(() => {
     setFilterProduct(productsSplit);
@@ -35,6 +35,7 @@ function Collection() {
     Bottomwear: false,
     Winterwear: false,
   });
+
   const handelChangType = (e) => {
     const { name, checked } = e.target;
     const newCheckType = { ...checkType, [name]: checked };
@@ -68,6 +69,7 @@ function Collection() {
     const activeCategory = Object.keys(newCheckItems).filter(
       (category) => newCheckItems[category]
     ); //her we get from the object just the true element
+
     const filterd =
       activeCategory.length === 0
         ? productsSplit

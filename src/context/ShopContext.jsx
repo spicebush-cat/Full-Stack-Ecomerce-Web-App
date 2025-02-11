@@ -5,7 +5,7 @@ export const Shopprovider = ({ children }) => {
   //this is what i xill provide to my app
   //some method and states
   const [search,setSearch]=useState('')
-  const [showSearch,setShowSearch]=useState(true)
+  const [showSearch,setShowSearch]=useState(false)
   const currency = "$";
   const delevry_fee = 10;
   const value = {

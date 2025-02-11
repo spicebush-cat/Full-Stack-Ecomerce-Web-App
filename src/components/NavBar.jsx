@@ -55,9 +55,8 @@ const NavBar = () => {
             className="h-5 font-bold"
             src={assets.search_icon}
             alt="searchIcon"
-         
           />
-        </Link>{" "}
+        </Link>
         <div className="group relative cursor-pointer">
           <img
             to="/login"
