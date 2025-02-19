@@ -6,7 +6,7 @@ function Contact() {
     <div className="pb-[130px] pt-5 flex flex-col justify-center items-center gap-y-10 ">
       <div className="flex items-center gap-2 text-[#414141]">
         <p className="font-semibold text-2xl ">
-          <span className="font-extralight text-gray-500 ">ABOUT </span> US
+          <span className="font-extralight text-gray-500 ">CONTACT </span> US
         </p>
         <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
       </div>

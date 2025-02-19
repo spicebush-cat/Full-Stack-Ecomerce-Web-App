@@ -22,7 +22,7 @@ function Collection() {
   useEffect(() => {
     setProductsSplit(products.slice(2));
   }, []);
-  
+
   console.log(productsSplit);
   useEffect(() => {
     setFilterProduct(productsSplit);
@@ -186,11 +186,11 @@ function Collection() {
             </select>
           </div>
         </div>
-        <div className="grid lg:grid-cols-4 md:grid-col-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center  pt-10 ">
+        <div className="grid lg:grid-cols-4 md:grid-col-3 sm:grid-cols-2 grid-cols-1 gap-6 items-center justify-center sm:justify-normal pt-10 ">
           {filterProducts.map((p, index) => (
             <ProductItem
               name={p.name}
-              id={p.id}
+              id={p._id}
               image={p.image}
               price={p.price}
               key={index}
