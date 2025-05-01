@@ -3,26 +3,35 @@ import { useParams } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import ProductItem from "../components/ProductItem";
+import { toast } from "react-toastify";
 function product() {
+  const [active, setActive] = useState(true);
+  const [clickNum, setClickNum] = useState(0);
+  const { card, setCard, products, currency, cardlength, setCardLength } =
+    useContext(ShopContext);
   const { productId } = useParams();
-  const { currency } = useContext(ShopContext);
+  console.log(card.length);
+
   console.log(productId);
-  const { products } = useContext(ShopContext);
+  const quentity = 0;
   const [productData, setProductData] = useState({});
+  //her we search for the id of the product that we click the display
   const fetchProductData = () => {
     const prod = products.find((item) => item._id === productId);
     if (prod) {
       setProductData(prod);
     }
   };
+  //her wh serch for realeated product to appear it
   const [RelatedProducts, setRelatedProducts] = useState([]);
+
   const findReletedProduct = () => {
     if (!productData.category) return;
     const releted = products.filter(
       (p) =>
         p.category === productData.category &&
         p._id !== productId &&
-        p.subCategory === productData.subCategory 
+        p.subCategory === productData.subCategory
     );
     if (releted) {
       setRelatedProducts(releted);
@@ -30,19 +39,24 @@ function product() {
   };
   useEffect(() => {
     fetchProductData();
+    console.log(productData);
   }, [productId]);
   useEffect(() => {
     findReletedProduct();
   }, [productData]);
+  // useEffect(()=>{
+ 
+  //   const savedActive = localStorage.getItem(`active_${productId}`);
+  //   if (savedActive !== null) setActive(savedActive === 'true');
+  // },[productId])
+  //her is the state of the size
   const [selectedSize, setSelectedSize] = useState(null);
-  // const handelSelectedSize = (e) => {
-  //   setSelectedSize(e);
-    console.log(selectedSize);
-  // };
-  const [addToCart, setAddToCart] = useState();
-  const handelAddToCrt = () => {
-    setAddToCart();
-  };
+  console.log(selectedSize);
+
+  useEffect(() => {
+    console.log(card);
+  }, [card]);
+
   return (
     <div className="flex flex-col gap-8 pt-9 pb-8">
       {/* first element */}
@@ -75,7 +89,6 @@ function product() {
                   />
                 ))}
               </div>
-
               <img
                 className="w-3 h-3"
                 src={assets.star_dull_icon}
@@ -97,7 +110,7 @@ function product() {
                   className={` px-3 py-1.5   border-[0.5px] m-1 bg-slate-50 ${
                     selectedSize === item ? "border-red-600" : "border-gray-200"
                   } `}
-                  onClick={() => setSelectedSize(item) }
+                  onClick={() => setSelectedSize(item)}
                   key={index}
                 >
                   {item}
@@ -105,7 +118,49 @@ function product() {
               ))}
             </div>
           </div>
-          <button className="border-[1px] border-black px-4 py-3 font-light text-black hover:bg-black hover:text-white transition-all ease-in-out text-sm">
+          <button
+            disabled={!active}
+            onClick={() => {
+              if (selectedSize === null) {
+                toast.error("Please choose a size");
+              } else {
+                // toast.success("Product added to the cart successfully!");
+            
+                const existingProduct = card.findIndex(
+                  (item) => item.selectedSize === selectedSize && item.productData._id===productData._id
+                );
+
+                if (existingProduct !== -1) {
+                  setCard((prevItems) =>
+                    prevItems.map((prod, index) =>
+                      index === existingProduct
+                        ? { ...prod, quentity: prod.quentity + 1 }
+                        : prod
+                    )
+                  );
+                } else {
+                  setCard((p) => [
+                    ...p,
+                    { productData, selectedSize, quentity: 1 },
+                  ]);
+
+                  ///problrm her
+                  setCardLength(card.length + 1);
+                }
+                console.log("the lenght of tehrcart now is :" + card.length);
+
+                // console.log(cart);
+              }
+              setClickNum((p)=>p+1)
+              if(clickNum>=7){
+                setActive(false)
+                // localStorage.setItem(`active_${productId}`, false);
+              }
+            }}
+            className={`border-[1px] border-black px-4 py-3 font-light text-black  hover:text-white transition-all ease-in-out text-sm ${
+              active ? "hover:bg-black" : "text-white bg-red-600"
+            }`}
+          >
             ADD TO CART
           </button>
           <hr className=" border-[0.5px] border-gray-200 w-full" />

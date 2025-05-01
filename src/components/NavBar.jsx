@@ -3,7 +3,7 @@ import { assets } from "../../public/assets/frontend_assets/assets";
 import { useContext, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 const NavBar = () => {
-  const { setShowSearch } = useContext(ShopContext);
+  const { setShowSearch,cardlength } = useContext(ShopContext);
   const [visible, setvisible] = useState(false);
   const handleSearchClick = () => {
     setShowSearch(true);
@@ -88,7 +88,7 @@ const NavBar = () => {
             alt="cartIcon"
           />
           <p className="absolute  rounded-full leading-4  text-[8px]  text-center -bottom-1 -right-1  text-white bg-slate-900 w-4 h-4">
-            10
+            {cardlength}
           </p>
         </Link>
         <img
