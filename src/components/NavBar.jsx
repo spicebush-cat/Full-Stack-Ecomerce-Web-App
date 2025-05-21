@@ -11,8 +11,8 @@ const NavBar = () => {
   return (
     <div className="flex justify-around   py-3 from-neutral-400 flex-row">
       <NavLink to="/">
-        <img className="h-10  p-0.5  " src={assets.logo} alt="logo" />
-      </NavLink>
+       <img src="/assets/frontend_assets/loogo.png" alt="Company Logo" className="h-14" />
+</NavLink>
       <ul className=" hidden sm:flex flex-row text-gray-700  gap-5 items-center">
         <li>
           <NavLink className="flex flex-col gap-1 items-center" to="/">
