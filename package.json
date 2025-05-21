@@ -13,11 +13,7 @@
     "axios": "^1.9.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-<<<<<<< HEAD
     "react-router-dom": "^7.6.0",
-=======
-    "react-router-dom": "^7.1.5",
->>>>>>> 83b28a122e6991040aa412dd99885b36616d6165
     "react-toastify": "^11.0.3"
   },
   "devDependencies": {
@@ -33,10 +29,6 @@
     "globals": "^15.14.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
-<<<<<<< HEAD
     "vite": "^6.0.5"
-=======
-    "vite": "^6.3.4"
->>>>>>> 83b28a122e6991040aa412dd99885b36616d6165
   }
 }
