@@ -8,8 +8,8 @@ const Footer = () => {
       
         <div className="flex flex-col gap-4">
           <NavLink to="/">
-            <img className="h-12" src={assets.logo} alt="Company Logo" />
-          </NavLink>
+            <img src="/assets/frontend_assets/loogo.png" alt="Company Logo" className="h-14" />
+ </NavLink>
           <p className="text-gray-600 text-sm leading-relaxed">
             Lorem Ipsum is simply dummy text of the printing and <br />
             typesetting industry. Lorem Ipsum has been the industry's <br />
