@@ -15,7 +15,7 @@ function Hero() {
     </div>
 
     {/* Title */}
-    <h2 SclassName="prata-regular text-4xl sm:text-5xl md:text-6xl text-[#414141] leading-tight">
+    <h2 className="prata-regular text-4xl sm:text-5xl md:text-6xl text-[#414141] leading-tight">
       Latest Arrivals
     </h2>
 

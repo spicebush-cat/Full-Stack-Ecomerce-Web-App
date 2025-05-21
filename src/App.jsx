@@ -4,10 +4,10 @@ import Home from "./pages/Home";
 import Collection from "./pages/Collection";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
-import Card from "./pages/Card";
+import Card from "./pages/card";
 import Login from "./pages/Login";
 import PlaceOrder from "./pages/PlaceOrder";
-import Product from "./pages/Product";
+import Product from "./pages/product";
 import Order from "./pages/Order";
 import Category from "./components/Category"; // Confirm path is correct
 import CategoryDetail from "./pages/CategoryDetail";
