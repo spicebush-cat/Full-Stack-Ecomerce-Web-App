@@ -58,7 +58,7 @@ function About() {
         <WhyChooseUs />
       </div>
       <div>
-        <NewsLatterBox />
+        {/* <NewsLatterBox /> */}
       </div>
     </div>
   );
