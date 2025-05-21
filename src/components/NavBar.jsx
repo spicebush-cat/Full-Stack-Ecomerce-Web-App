@@ -42,6 +42,13 @@ const NavBar = () => {
           </NavLink>
         </li>
         <li>
+          <NavLink className="flex flex-col gap-1 items-center" to="/form">
+            <p>Form</p>
+            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
+          </NavLink>
+        </li>
+        <li>
+
           <button className="rounded-3xl border  border-gray-300 font-light text-sm p-2.5 ">
             admin panel
           </button>
@@ -153,6 +160,15 @@ const NavBar = () => {
           >
             {" "}
             <p>Contact</p>
+            <hr className="w-full border-none h-[1px] bg-gray-500 " />
+          </NavLink>
+          <NavLink
+            onClick={() => setvisible(!visible)}
+            className="flex flex-col gap-1  hover:text-white hover:bg-black"
+            to="/Form"
+          >
+            {" "}
+            <p>Form</p>
             <hr className="w-full border-none h-[1px] bg-gray-500 " />
           </NavLink>
           <NavLink
