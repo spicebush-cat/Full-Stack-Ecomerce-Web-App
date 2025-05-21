@@ -8,7 +8,7 @@ const Footer = () => {
       
         <div className="flex flex-col gap-4">
           <NavLink to="/">
-            <img src="/assets/frontend_assets/loogo.png" alt="Company Logo" className="h-14" />
+            <img src="/assets/frontend_assets/handy-logo1.png" alt="Company Logo" className="h-24" />
  </NavLink>
           <p className="text-gray-600 text-sm leading-relaxed">
             Lorem Ipsum is simply dummy text of the printing and <br />

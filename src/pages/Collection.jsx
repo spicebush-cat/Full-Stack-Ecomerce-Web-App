@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import ProductItem from "../components/ProductItem";
+import { ShopContext } from "../context/ShopContext";
 
 function Collection() {
   const [products, setProducts] = useState([]);
@@ -12,12 +13,11 @@ function Collection() {
   const [availableSubcategories, setAvailableSubcategories] = useState([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState({});
 
-  const [allProducts, setAllProducts] = useState([]); // ✅ Store all products initially
+  const { search } = useContext(ShopContext); // ⬅️ Add search from context
 
-  // Fetch categories
+  // Fetch categories and initialize selectedCategories
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/allcategory")
+    axios.get("http://127.0.0.1:8000/api/allcategory")
       .then((res) => {
         setCategoriesData(res.data);
         const initialCategoryState = {};
@@ -29,19 +29,17 @@ function Collection() {
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 
-  // Fetch all products once
+  // Fetch all products on mount
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/products")
+    axios.get("http://127.0.0.1:8000/api/products")
       .then((res) => {
-        setAllProducts(res.data);
         setProducts(res.data);
         setFilterProduct(res.data);
       })
       .catch((err) => console.error("Error fetching all products:", err));
   }, []);
 
-  // Update when categories change
+  // Fetch products when category changes
   useEffect(() => {
     const activeCategories = Object.keys(selectedCategories).filter(
       (cat) => selectedCategories[cat]
@@ -73,34 +71,47 @@ function Collection() {
           setSelectedSubcategories({});
         });
     } else if (activeCategories.length === 0) {
-      // ✅ Fix: Reset to show all products
-      setProducts(allProducts);
-      setFilterProduct(allProducts);
-      setAvailableSubcategories([]);
-      setSelectedSubcategories({});
+      // Show all products if no category selected
+      axios.get("http://127.0.0.1:8000/api/products")
+        .then((res) => {
+          setProducts(res.data);
+          setFilterProduct(res.data);
+          setAvailableSubcategories([]);
+          setSelectedSubcategories({});
+        })
+        .catch((err) => console.error("Error re-fetching all products:", err));
     } else {
+      // Multiple categories selected (you can adjust this behavior)
       setProducts([]);
       setFilterProduct([]);
       setAvailableSubcategories([]);
       setSelectedSubcategories({});
     }
-  }, [selectedCategories, categoriesData, allProducts]);
+  }, [selectedCategories, categoriesData]);
 
-  // Filter by subcategories
+  // Filter products by subcategories and search
   useEffect(() => {
     let filtered = [...products];
+
+    // Subcategory filter
     const activeSub = Object.keys(selectedSubcategories).filter(
       (sub) => selectedSubcategories[sub]
     );
-
     if (activeSub.length > 0) {
       filtered = filtered.filter((p) => activeSub.includes(p.subcategory));
     }
 
-    setFilterProduct(filtered);
-  }, [selectedSubcategories, products]);
+    // Search filter
+    if (search.trim() !== "") {
+      filtered = filtered.filter((p) =>
+        p.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-  // Sort logic
+    setFilterProduct(filtered);
+  }, [selectedSubcategories, products, search]);
+
+  // Sort products
   const handleSelectSortBy = (e) => {
     const value = e.target.value;
     setSelectSortBy(value);
@@ -114,7 +125,7 @@ function Collection() {
     setFilterProduct(sorted);
   };
 
-  // Handle category toggle
+  // Handle category checkbox
   const handleCategoryChange = (e) => {
     const { name, checked } = e.target;
     const updated = Object.keys(selectedCategories).reduce((acc, key) => {
@@ -125,7 +136,7 @@ function Collection() {
     setSelectedCategories(updated);
   };
 
-  // Handle subcategory toggle
+  // Handle subcategory checkbox
   const handleSubcategoryChange = (e) => {
     const { name, checked } = e.target;
     setSelectedSubcategories((prev) => ({ ...prev, [name]: checked }));
@@ -133,7 +144,7 @@ function Collection() {
 
   return (
     <div className="grid grid-row sm:grid-cols-[1fr_2fr] md:grid-cols-[1fr_3fr] pb-[200px] pt-10 gap-8">
-      {/* Filters */}
+      {/* Filter Section */}
       <div className="flex flex-col gap-3">
         <p className="text-2xl pb-10">Filter</p>
 
@@ -178,7 +189,7 @@ function Collection() {
         )}
       </div>
 
-      {/* Products */}
+      {/* Product Section */}
       <div>
         <div className="flex flex-row justify-between items-center mb-6">
           <div className="flex items-center gap-2">
