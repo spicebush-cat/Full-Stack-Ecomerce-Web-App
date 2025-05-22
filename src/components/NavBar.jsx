@@ -2,17 +2,22 @@ import { NavLink, Link } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
 import { useContext, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
+
 const NavBar = () => {
-  const { setShowSearch,cardlength } = useContext(ShopContext);
+  const { setShowSearch, cardlength } = useContext(ShopContext);
   const [visible, setvisible] = useState(false);
   const handleSearchClick = () => {
     setShowSearch(true);
   };
   return (
-    <div className="flex justify-around   py-3 from-neutral-400 flex-row">
+    <div className="flex justify-around py-3 from-neutral-400 flex-row">
       <NavLink to="/">
-       <img src="/assets/frontend_assets/handy-logo1.png" alt="Company Logo" className="h-24" />
-</NavLink>
+        <img
+          src="/assets/frontend_assets/handy-logo1.png"
+          alt="Company Logo"
+          className="h-24"
+        />
+      </NavLink>
       <ul className=" hidden sm:flex flex-row text-gray-700  gap-5 items-center">
         <li>
           <NavLink className="flex flex-col gap-1 items-center" to="/">
@@ -48,16 +53,19 @@ const NavBar = () => {
           </NavLink>
         </li>
         <li>
-
-          <button className="rounded-3xl border  border-gray-300 font-light text-sm p-2.5 ">
+          <a
+            href="http://localhost:8000/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-3xl border border-gray-300 font-light text-sm p-2.5 inline-block text-center"
+          >
             admin panel
-          </button>
+          </a>
         </li>
       </ul>
 
       <div className="flex flex-row gap-5 items-center  p-1 ">
-        
-        <Link to='/collection' onClick={handleSearchClick} >
+        <Link to="/collection" onClick={handleSearchClick}>
           <img
             className="h-5 font-bold"
             src={assets.search_icon}
@@ -171,18 +179,21 @@ const NavBar = () => {
             <p>Form</p>
             <hr className="w-full border-none h-[1px] bg-gray-500 " />
           </NavLink>
-          <NavLink
-            onClick={() => setvisible(!visible)}
-            className="flex flex-col gap-1  hover:text-white hover:bg-black"
-            to="/contact"
+
+          <a
+            href="http://localhost:8000/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setvisible(false)}
+            className="flex flex-col gap-1 hover:text-white hover:bg-black"
           >
-            {" "}
             <p>Admin Panel</p>
             <hr className="w-full border-none h-[1px] bg-gray-500 " />
-          </NavLink>
+          </a>
         </div>
       </div>
     </div>
   );
 };
+
 export default NavBar;
