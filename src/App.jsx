@@ -6,6 +6,8 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Card from "./pages/card";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+
 import Formula from "./pages/Formula";
 import PlaceOrder from "./pages/PlaceOrder";
 import Product from "./pages/product";
@@ -35,6 +37,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/card" element={<Card />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/orders" element={<Order />} />

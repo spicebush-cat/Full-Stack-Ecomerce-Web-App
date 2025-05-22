@@ -7,7 +7,7 @@ export const Shopprovider = ({ children }) => {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [card, setCard] = useState([]);
-  const currency = "$";
+  const currency = "DZ";
   const delevry_fee = 10;
    
   const [cardlength,setCardLength]=useState(0)//this is teh probrlm 

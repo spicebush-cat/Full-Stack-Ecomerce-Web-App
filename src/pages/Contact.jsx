@@ -1,8 +1,45 @@
-import React from "react";
+import React, { useState } from "react";
 import NewsLatterBox from "../components/NewsLatterBox";
 import { assets } from "../../public/assets/frontend_assets/assets";
 
 function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/api/postcontact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        alert("Failed to send message: " + (result.message || "Unknown error"));
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("An error occurred while sending your message.");
+    }
+  };
+
   return (
     <div className="pb-[130px] pt-5 flex flex-col justify-center items-center gap-y-10 ">
       {/* Title */}
@@ -22,15 +59,33 @@ function Contact() {
           className="w-full sm:w-1/2 object-cover"
         />
 
-        {/* Form container (same width as image) */}
+        {/* Form container */}
         <div className="w-full sm:w-1/2 pt-20 flex justify-center">
-          {/* Form centered inside container */}
-          <form className="flex flex-col gap-5 text-gray-500 w-full max-w-sm">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-5 text-gray-500 w-full max-w-sm"
+          >
             <label className="flex flex-col gap-2 text-sm w-full">
               <span className="text-black font-semibold">Email</span>
               <input
                 type="email"
+                name="email"
                 placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-1 focus:ring-black"
+                required
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm w-full">
+              <span className="text-black font-semibold">Name</span>
+              <input
+                type="text"
+                name="name"
+                placeholder="Nouara"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-1 focus:ring-black"
                 required
               />
@@ -39,8 +94,11 @@ function Contact() {
             <label className="flex flex-col gap-2 text-sm w-full">
               <span className="text-black font-semibold">Message</span>
               <textarea
+                name="message"
                 placeholder="Your message"
-                rows={5}
+                rows={6}
+                value={formData.message}
+                onChange={handleChange}
                 className="w-full border border-gray-300 px-4 py-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-black"
                 required
               />
@@ -62,4 +120,3 @@ function Contact() {
 }
 
 export default Contact;
-

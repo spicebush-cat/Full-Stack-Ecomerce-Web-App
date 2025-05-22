@@ -24,27 +24,36 @@ const fetchProductData = async () => {
     if (data.productDetails && data.productDetails.length > 0) {
       const prod = data.productDetails[0];
 
-      // Match with product_list using product_code
-      const matchedProduct = products.find(p => p.product_code === prod.product_code);
+      console.log("Product ID from URL:", productId);
+      console.log("Product Code from product_details API:", prod.product_code);
+      console.log("All products from context:", products); // See the entire array
+
+      const matchedProduct = products.find(p => {
+        console.log(`Comparing context product_code: ${p.product_code} with API product_code: ${prod.product_code}`);
+        return p.product_code === prod.product_code;
+      });
+
+      console.log("Result of find (matchedProduct):", matchedProduct);
+      console.log("Price assigned:", matchedProduct?.price);
 
       setProductData({
         _id: prod.id,
         product_code: prod.product_code,
         name: matchedProduct?.name || `Product ${prod.product_code}`,
-        image: matchedProduct?.image || prod.image_one, // fallback if not in list
+        image: matchedProduct?.image || prod.image_one,
         image1: prod.image_one,
         image2: prod.image_two,
         image3: prod.image_three,
         image4: prod.image_four,
         description: prod.short_description || "",
         longDescription: prod.long_description || "",
-        price: matchedProduct?.price || 0,
+        price: matchedProduct?.price, // This is where the price is assigned
         sizes: prod.size?.split(",") || [],
         category: matchedProduct?.category || "N/A",
         subCategory: matchedProduct?.subCategory || "N/A",
       });
     } else {
-      console.error("No product details found");
+      console.error("No product details found for ID:", productId);
     }
   } catch (error) {
     console.error("Error fetching product data:", error);
