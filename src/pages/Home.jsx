@@ -22,7 +22,7 @@ function Home() {
       <HeroCollection />
 
       <OurPlicy />
-      <NewsLatterBox/>
+      {/* <NewsLatterBox/> */}
     </div>
   );
 }

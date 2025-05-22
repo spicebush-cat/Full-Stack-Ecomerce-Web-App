@@ -4,10 +4,11 @@ import Home from "./pages/Home";
 import Collection from "./pages/Collection";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
-import Card from "./pages/Card";
+import Card from "./pages/card";
 import Login from "./pages/Login";
+import Formula from "./pages/Formula";
 import PlaceOrder from "./pages/PlaceOrder";
-import Product from "./pages/Product";
+import Product from "./pages/product";
 import Order from "./pages/Order";
 import Category from "./components/Category"; // Confirm path is correct
 import CategoryDetail from "./pages/CategoryDetail";
@@ -30,15 +31,13 @@ function App() {
         <Route path="/" element={<Home/>} />
         <Route path="/collection" element={<Collection/>} />
         <Route path="/contact" element={<Contact/>} />
-
+        <Route path="/form" element={<Formula/>} />
         <Route path="/about" element={<About />} />
         <Route path="/card" element={<Card />} />
         <Route path="/login" element={<Login />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/orders" element={<Order />} />
-
-
         {/* Category routes */}
         <Route path="/category" element={<Category />} />
         <Route path="/category/:categoryName" element={<CategoryDetail />} />
