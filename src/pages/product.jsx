@@ -1,297 +1,141 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { assets } from "../../public/assets/frontend_assets/assets";
-import { ShopContext } from "../context/ShopContext";
-import ProductItem from "../components/ProductItem";
-import { toast } from "react-toastify";
-function product() {
-  const [active, setActive] = useState(true);
-  const [clickNum, setClickNum] = useState(0);
-  const { card, setCard, products, currency, cardlength, setCardLength } =
-    useContext(ShopContext);
-  const { productId } = useParams();
-  console.log(card.length);
+import React, { useState } from "react";
 
-  console.log(productId);
-  const quentity = 0;
-  const [productData, setProductData] = useState({});
-  //her we search for the id of the product that we click the display
-const fetchProductData = async () => {
-  try {
-    const response = await fetch(`http://127.0.0.1:8000/api/productdetails/${productId}`);
-    const data = await response.json();
-
-    if (data.productDetails && data.productDetails.length > 0) {
-      const prod = data.productDetails[0];
-
-      console.log("Product ID from URL:", productId);
-      console.log("Product Code from product_details API:", prod.product_code);
-      console.log("All products from context:", products); // See the entire array
-
-      const matchedProduct = products.find(p => {
-        console.log(`Comparing context product_code: ${p.product_code} with API product_code: ${prod.product_code}`);
-        return p.product_code === prod.product_code;
-      });
-
-      console.log("Result of find (matchedProduct):", matchedProduct);
-      console.log("Price assigned:", matchedProduct?.price);
-
-      setProductData({
-        _id: prod.id,
-        product_code: prod.product_code,
-        name: matchedProduct?.name || `Product ${prod.product_code}`,
-        image: matchedProduct?.image || prod.image_one,
-        image1: prod.image_one,
-        image2: prod.image_two,
-        image3: prod.image_three,
-        image4: prod.image_four,
-        description: prod.short_description || "",
-        longDescription: prod.long_description || "",
-        price: matchedProduct?.price, // This is where the price is assigned
-        sizes: prod.size?.split(",") || [],
-        category: matchedProduct?.category || "N/A",
-        subCategory: matchedProduct?.subCategory || "N/A",
-      });
-    } else {
-      console.error("No product details found for ID:", productId);
-    }
-  } catch (error) {
-    console.error("Error fetching product data:", error);
-  }
+const productData = {
+  name: "Product 1",
+  price: "DZ",
+  description: "ksjdklfjkljskldj",
+  images: [
+    { url: "first-img-url", alt: "first-img" },    // principal
+    { url: "second-img-url", alt: "second-img" },  // left top
+    { url: "third-img-url", alt: "third-img" },    // left bottom
+    { url: "fourth-img-url", alt: "fourth-img" },  // bottom left
+    { url: "fifth-img-url", alt: "fifth-img" },    // bottom right
+  ],
+  sizes: ["S", "M", "L", "XL"],
+  reviews: 122,
+  rating: 4,
 };
 
+function ProductDetail() {
+  const [selectedImage, setSelectedImage] = useState(productData.images[0].url);
+  const [selectedSize, setSelectedSize] = useState("");
 
-
-  //her wh serch for realeated product to appear it
-  const [RelatedProducts, setRelatedProducts] = useState([]);
-
-  const findReletedProduct = () => {
-    if (!productData.category) return;
-    const releted = products.filter(
-      (p) =>
-        p.category === productData.category &&
-        p._id !== productId &&
-        p.subCategory === productData.subCategory
-    );
-    if (releted) {
-      setRelatedProducts(releted);
-    }
-  };
-  useEffect(() => {
-    fetchProductData();
-    console.log(productData);
-  }, [productId]);
-  useEffect(() => {
-    findReletedProduct();
-  }, [productData]);
-  // useEffect(()=>{
- 
-  //   const savedActive = localStorage.getItem(`active_${productId}`);
-  //   if (savedActive !== null) setActive(savedActive === 'true');
-  // },[productId])
-  //her is the state of the size
-  const [selectedSize, setSelectedSize] = useState(null);
-  console.log(selectedSize);
-
-  useEffect(() => {
-    console.log(card);
-  }, [card]);
+  const PRINCIPAL_SIZE = 320; // px
 
   return (
     <div className="flex flex-col gap-8 pt-9 pb-8">
-      {/* first element */}
-      <div className="grid  sm:grid-cols-[1.5fr_5fr_7fr] flex-col  justify-between sm:justify-normal ">
-        {/* <div>
+      {/* Images and Info Section */}
+      <div className="flex flex-row gap-8">
+        {/* Left Column: Two stacked images */}
+        <div className="flex flex-col gap-2 justify-center">
           <img
-            src={productData.image}
-            alt="zero-img"
-            className=" pt-4 sm:pt-0 sm:pr-4"
+            src={productData.images[1].url}
+            alt={productData.images[1].alt}
+            style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
+            className={`object-cover border rounded cursor-pointer ${
+              selectedImage === productData.images[1].url ? "border-black" : "border-gray-300"
+            }`}
+            onClick={() => setSelectedImage(productData.images[1].url)}
           />
-        </div> */}
-        <div>
           <img
-            src={productData.image1}
-            alt="first-img"
-            className="pt-4 sm:pt-0 sm:pr-4"
-          />
-           <img
-            src={productData.image3}
-            alt="third-img"
-            className="pt-4 sm:pt-0 sm:pr-6 hidden sm:block "
-          />
-           <img
-            src={productData.image3}
-            alt="third-img"
-            className="pt-4 sm:pt-0 sm:pr-6 hidden sm:block "
+            src={productData.images[2].url}
+            alt={productData.images[2].alt}
+            style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
+            className={`object-cover border rounded cursor-pointer ${
+              selectedImage === productData.images[2].url ? "border-black" : "border-gray-300"
+            }`}
+            onClick={() => setSelectedImage(productData.images[2].url)}
           />
         </div>
-          <div>
+
+        {/* Center Column: Principal image with two images below */}
+        <div className="flex flex-col items-center">
           <img
-            src={productData.image2}
-            alt="second-img"
-            className="pt-4 sm:pt-0 sm:pr-4 "
+            src={selectedImage}
+            alt="Selected product"
+            style={{ width: PRINCIPAL_SIZE, height: PRINCIPAL_SIZE }}
+            className="object-cover rounded-lg border"
           />
-          
+          <div className="flex flex-row gap-2 mt-2">
+            <img
+              src={productData.images[3].url}
+              alt={productData.images[3].alt}
+              style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
+              className={`object-cover border rounded cursor-pointer ${
+                selectedImage === productData.images[3].url ? "border-black" : "border-gray-300"
+              }`}
+              onClick={() => setSelectedImage(productData.images[3].url)}
+            />
+            <img
+              src={productData.images[4].url}
+              alt={productData.images[4].alt}
+              style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
+              className={`object-cover border rounded cursor-pointer ${
+                selectedImage === productData.images[4].url ? "border-black" : "border-gray-300"
+              }`}
+              onClick={() => setSelectedImage(productData.images[4].url)}
+            />
+          </div>
         </div>
-          {/* <div>
-         
-        </div>
-          <div>
-          <img
-            src={productData.image4}
-            alt="forth-img"
-            className="pt-4 sm:pt-0 sm:pr-6 hidden sm:block "
-          />
-        </div> */}
-        <div className="flex flex-col ml-4 gap-6 items-start justify-center ">
+
+        {/* Right Column: Product Info */}
+        <div className="flex flex-col gap-6 items-start justify-center">
           <div>
             <p className="text-2xl pb-3">{productData.name}</p>
-            <div className="flex flex-row items-center ">
+            <div className="flex flex-row items-center">
               <div className="flex flex-row">
-                {[...Array(4)].map((_, i) => (
-                  <img
-                    className="w-3 h-3"
-                    key={i}
-                    src={assets.star_icon}
-                    alt="assets.star_icon"
-                  />
+                {[...Array(productData.rating)].map((_, i) => (
+                  <span key={i} className="text-orange-500">★</span>
+                ))}
+                {[...Array(5 - productData.rating)].map((_, i) => (
+                  <span key={i} className="text-gray-300">★</span>
                 ))}
               </div>
-              <img
-                className="w-3 h-3"
-                src={assets.star_dull_icon}
-                alt="assets.star_dull_icon"
-              />
-              <p className="pl-2">(122)</p>
+              <p className="pl-2">({productData.reviews})</p>
             </div>
           </div>
-          <p className="text-3xl">
-            {" "}
-            {currency} {productData.price}
-          </p>
+          <p className="text-3xl">{productData.price}</p>
           <p className="text-gray-500 font-light">{productData.description}</p>
           <div>
-            <p>Select Size </p>
+            <p>Select Size</p>
             <div>
-              {productData.sizes?.map((item, index) => (
+              {productData.sizes.map((size, idx) => (
                 <button
-                  className={` px-3 py-1.5   border-[0.5px] m-1 bg-slate-50 ${
-                    selectedSize === item ? "border-red-600" : "border-gray-200"
-                  } `}
-                  onClick={() => setSelectedSize(item)}
-                  key={index}
+                  key={idx}
+                  className={`px-3 py-1.5 border-[0.5px] m-1 bg-slate-50 ${
+                    selectedSize === size ? "border-red-600" : "border-gray-200"
+                  }`}
+                  onClick={() => setSelectedSize(size)}
                 >
-                  {item}
+                  {size}
                 </button>
               ))}
             </div>
           </div>
           <button
-            disabled={!active}
+            className="border-[1px] border-black px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-black"
+            disabled={!selectedSize}
             onClick={() => {
-              if (selectedSize === null) {
-                toast.error("Please choose a size");
+              if (!selectedSize) {
+                alert("Please choose a size");
               } else {
-                // toast.success("Product added to the cart successfully!");
-            
-                const existingProduct = card.findIndex(
-                  (item) => item.selectedSize === selectedSize && item.productData._id===productData._id
-                );
-
-                if (existingProduct !== -1) {
-                  setCard((prevItems) =>
-                    prevItems.map((prod, index) =>
-                      index === existingProduct
-                        ? { ...prod, quentity: prod.quentity + 1 }
-                        : prod
-                    )
-                  );
-                } else {
-                  setCard((p) => [
-                    ...p,
-                    { productData, selectedSize, quentity: 1 },
-                  ]);
-
-                  ///problrm her
-                  setCardLength(card.length + 1);
-                }
-                console.log("the lenght of tehrcart now is :" + card.length);
-
-                // console.log(cart);
-              }
-              setClickNum((p)=>p+1)
-              if(clickNum>=7){
-                setActive(false)
-                // localStorage.setItem(`active_${productId}`, false);
+                alert(`Added: ${productData.name} - Size: ${selectedSize}`);
               }
             }}
-            className={`border-[1px] border-black px-4 py-3 font-light text-black  hover:text-white transition-all ease-in-out text-sm ${
-              active ? "hover:bg-black" : "text-white bg-red-600"
-            }`}
           >
             ADD TO CART
           </button>
-          <hr className=" border-[0.5px] border-gray-200 w-full" />
         </div>
       </div>
-      <div className="flex flex-col w-auto font-light text-gray-400 items-end  ">
+
+      {/* Delivery Info */}
+      <div className="flex flex-col w-auto font-light text-gray-400 items-end">
         <p>100% Original product.</p>
         <p>Cash on delivery is available on this product.</p>
         <p>Easy return and exchange policy within 7 days.</p>
-      </div>
-
-      <div>
-        {/* duscription */}
-        <div className="flex   items-center  mt-10">
-          <p className="p-4 font-semibold border-[0.5px] border-gray-400 border-b-0 ">
-            Description
-          </p>
-          <p className="font-light p-4  border-[0.5px] border-gray-400 border-l-0 border-b-0">
-            Reviews (122)
-          </p>
-        </div>
-        <div className="border-[0.5px] border-gray-400 p-5 gap-3 flex flex-col ">
-          <p className="text-gray-500  ">
-            An e-commerce website is an online platform that facilitates the
-            buying and selling of products or services over the internet. It
-            serves as a virtual marketplace where businesses and individuals can
-            showcase their products, interact with customers, and conduct
-            transactions without the need for a physical presence. E-commerce
-            websites have gained immense popularity due to their convenience,
-            accessibility, and the global reach they offer.
-          </p>
-          <p className="text-gray-500   ">
-            E-commerce websites typically display products or services along
-            with detailed descriptions, images, prices, and any available
-            variations (e.g., sizes, colors). Each product usually has its own
-            dedicated page with relevant information.
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between flex-col gap-5  ">
-        {/* related product */}
-        <div className="flex items-center gap-2 text-[#414141]">
-          <p className="font-semibold text-2xl ">
-            <span className="font-extralight text-gray-500 ">RELATED </span>{" "}
-            PRODUCTS
-          </p>
-          <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
-        </div>
-
-        <div className="grid lg:grid-cols-5 md:grid-col-3 sm:grid-cols-3 grid-cols-1 gap-6 justify-items-center ">
-          {/* problrm is her */}
-          {RelatedProducts.map((p, index) => (
-            <ProductItem
-              image={p.image}
-              key={index}
-              name={p.name}
-              price={p.price}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );
 }
 
-export default product;
+export default ProductDetail;
