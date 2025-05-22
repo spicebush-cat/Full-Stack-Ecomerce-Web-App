@@ -4,7 +4,10 @@ import { assets } from "../../public/assets/frontend_assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import ProductItem from "../components/ProductItem";
 import { toast } from "react-toastify";
+
 function product() {
+  
+ 
   const [active, setActive] = useState(true);
   const [clickNum, setClickNum] = useState(0);
   const { card, setCard, products, currency, cardlength, setCardLength } =
@@ -96,6 +99,7 @@ const fetchProductData = async () => {
   useEffect(() => {
     console.log(card);
   }, [card]);
+ 
 
   return (
     <div className="flex flex-col gap-8 pt-9 pb-8">
@@ -231,6 +235,7 @@ const fetchProductData = async () => {
           >
             ADD TO CART
           </button>
+         
           <hr className=" border-[0.5px] border-gray-200 w-full" />
         </div>
       </div>

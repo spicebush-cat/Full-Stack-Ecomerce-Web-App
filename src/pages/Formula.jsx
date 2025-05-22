@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const Formula = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ const Formula = () => {
     specialPrice: ''
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -26,80 +29,99 @@ const Formula = () => {
 
   const handleFileChange = (e) => {
     if (e.target.files) {
+      const files = Array.from(e.target.files);
+      if (files.length > 5) {
+        toast.error('Maximum 5 images allowed');
+        return;
+      }
       setFormData(prev => ({
         ...prev,
-        pictures: Array.from(e.target.files)
+        pictures: files
       }));
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  const form = new FormData();
-  form.append('name', formData.sellerName);
-  form.append('email', formData.email);
-  form.append('phone', formData.phoneNumber);
-  form.append('title', formData.productName);
-  form.append('brand', formData.brand);
-  form.append('color', formData.color);
-  form.append('size', formData.size);
-  form.append('price', formData.price);
-  form.append('special_price', formData.specialPrice);
-  form.append('short_description', formData.descriptionChart);
-  form.append('long_description', formData.descriptionLine);
-  form.append('notes', ''); // optional field
- if (formData.pictures[0]) form.append('image', formData.pictures[0]);
-  if (formData.pictures[1]) form.append('image_one', formData.pictures[1]);
-  if (formData.pictures[2]) form.append('image_two', formData.pictures[2]);
-  if (formData.pictures[3]) form.append('image_three', formData.pictures[3]);
-  if (formData.pictures[4]) form.append('image_four', formData.pictures[4]);
+    try {
+      const form = new FormData();
+      form.append('name', formData.sellerName);
+      form.append('email', formData.email);
+      form.append('phone', formData.phoneNumber);
+      form.append('title', formData.productName);
+      form.append('brand', formData.brand);
+      form.append('color', formData.color);
+      form.append('size', formData.size);
+      form.append('price', formData.price);
+      form.append('special_price', formData.specialPrice);
+      form.append('short_description', formData.descriptionChart);
+      form.append('long_description', formData.descriptionLine);
+      form.append('notes', '');
 
-  try {
-    const response = await fetch('http://localhost:8000/api/submitProduct', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-      },
-      body: form,
-    });
+      // Append images with proper naming
+      formData.pictures.forEach((file, index) => {
+        const fieldName = index === 0 ? 'image' : `image_${['one', 'two', 'three', 'four'][index - 1]}`;
+        form.append(fieldName, file);
+      });
 
-    const data = await response.json();
-    console.log('Server response:', data);
-  } catch (error) {
-    console.error('Submit error:', error);
-  }
-};
+      const response = await fetch('http://localhost:8000/api/submitProduct', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+        },
+        body: form,
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Product submitted successfully!');
+        setFormData({
+          sellerName: '',
+          phoneNumber: '',
+          email: '',
+          productName: '',
+          brand: '',
+          pictures: [],
+          descriptionChart: '',
+          descriptionLine: '',
+          color: '',
+          size: '',
+          price: '',
+          specialPrice: ''
+        });
+      } else {
+        throw new Error(data.message || 'Failed to submit product');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Error submitting product');
+      console.error('Submit error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="font-sans pt-20">
-      <main style={{
-        backgroundColor: "white",
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-        inset: "0",
-        opacity: "0.8",
-        zIndex: "0",
-      }}>
-        <div className="max-w-5xl text-center mx-auto p-6 rounded-2xl shadow-md">
-        <div className="flex items-center gap-2 text-[#414141]   ">
-        <p className="font-semibold text-2xl ">
-          <span className="font-extralight text-gray-500 ">PRODUCT </span> FORM
-        </p>
-
-        <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
-       
-      </div>
-    <div className='text-left'>
-    <p className="text-black mb-6 text-xl">Fill out the form so you can upload your product ...</p>
-       
-    </div>
-        
+      <main className="bg-white min-h-screen">
+        <div className="max-w-5xl mx-auto p-6 rounded-2xl shadow-md">
+          <div className="flex items-center gap-2 text-[#414141]">
+            <p className="font-semibold text-2xl">
+              <span className="font-extralight text-gray-500">PRODUCT </span> FORM
+            </p>
+            <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
+          </div>
+          
+          <div className='text-left'>
+            <p className="text-black mb-6 text-xl">Fill out the form so you can upload your product ...</p>
+          </div>
+          
           <form onSubmit={handleSubmit} className='border rounded-xl p-10 bg-gray-200'>
             {/* Seller Information Section */}
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-[#414141] mb-4 border-b pb-2">Seller Information</h2>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="mb-4">
                   <label className="block text-black text-sm font-medium mb-1">Name:</label>
@@ -108,7 +130,7 @@ const handleSubmit = async (e) => {
                     name="sellerName"
                     value={formData.sellerName}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF] placeholder:text-white"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                     required
                   />
                 </div>
@@ -120,7 +142,7 @@ const handleSubmit = async (e) => {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                     required
                   />
                 </div>
@@ -132,7 +154,7 @@ const handleSubmit = async (e) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                     required
                   />
                 </div>
@@ -142,7 +164,6 @@ const handleSubmit = async (e) => {
             {/* Product Information Section */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-[#414141] mb-4 border-b pb-2">Product Information</h2>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="mb-4">
                   <label className="block text-black text-sm font-medium mb-1">Product Name:</label>
@@ -151,7 +172,7 @@ const handleSubmit = async (e) => {
                     name="productName"
                     value={formData.productName}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                     required
                   />
                 </div>
@@ -163,9 +184,10 @@ const handleSubmit = async (e) => {
                     name="brand"
                     value={formData.brand}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
+
                 <div className="mb-4">
                   <label className="block text-black text-sm font-medium mb-1">Color:</label>
                   <input
@@ -173,7 +195,7 @@ const handleSubmit = async (e) => {
                     name="color"
                     value={formData.color}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
                 
@@ -184,7 +206,7 @@ const handleSubmit = async (e) => {
                     name="size"
                     value={formData.size}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
                 
@@ -195,7 +217,7 @@ const handleSubmit = async (e) => {
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                     required
                   />
                 </div>
@@ -207,54 +229,57 @@ const handleSubmit = async (e) => {
                     name="specialPrice"
                     value={formData.specialPrice}
                     onChange={handleChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-black text-sm font-medium mb-1">Pictures:</label>
-                  <input
-                    type="file"
-                    name="pictures"
-                    onChange={handleFileChange}
-                    className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
-                    multiple
-                    accept="image/*"
+                    className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
                   />
                 </div>
               </div>
-              
+
               <div className="mb-4">
-                <label className="block text-black text-sm font-medium mb-1">Description short:</label>
+                <label className="block text-black text-sm font-medium mb-1">Product Images (Max 5):</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-black text-sm font-medium mb-1">Short Description:</label>
                 <textarea
                   name="descriptionChart"
                   value={formData.descriptionChart}
                   onChange={handleChange}
-                  rows={4}
-                  className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                  className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  rows="3"
+                  required
                 />
               </div>
-              
+
               <div className="mb-4">
-                <label className="block text-black text-sm font-medium mb-1">Description Long:</label>
+                <label className="block text-black text-sm font-medium mb-1">Long Description:</label>
                 <textarea
                   name="descriptionLine"
                   value={formData.descriptionLine}
                   onChange={handleChange}
-                  rows={4}
-                  className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                  className="w-full px-3 py-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  rows="5"
+                  required
                 />
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className="border-[1px] border-black px-4 py-3 font-light text-black  hover:text-white transition-all ease-in-out text-sm"
-              >
-                Send
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full bg-black text-white py-4 rounded-lg font-medium transition-all duration-300 ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'
+              }`}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Product'}
+            </button>
           </form>
         </div>
       </main>
