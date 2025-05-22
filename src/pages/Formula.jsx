@@ -6,7 +6,7 @@ const Formula = () => {
     phoneNumber: '',
     email: '',
     productName: '',
-    breed: '',
+    brand: '',
     pictures: [],
     descriptionChart: '',
     descriptionLine: '',
@@ -33,11 +33,43 @@ const Formula = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add your form submission logic here
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const form = new FormData();
+  form.append('name', formData.sellerName);
+  form.append('email', formData.email);
+  form.append('phone', formData.phoneNumber);
+  form.append('title', formData.productName);
+  form.append('brand', formData.brand);
+  form.append('color', formData.color);
+  form.append('size', formData.size);
+  form.append('price', formData.price);
+  form.append('special_price', formData.specialPrice);
+  form.append('short_description', formData.descriptionChart);
+  form.append('long_description', formData.descriptionLine);
+  form.append('notes', ''); // optional field
+ if (formData.pictures[0]) form.append('image', formData.pictures[0]);
+  if (formData.pictures[1]) form.append('image_one', formData.pictures[1]);
+  if (formData.pictures[2]) form.append('image_two', formData.pictures[2]);
+  if (formData.pictures[3]) form.append('image_three', formData.pictures[3]);
+  if (formData.pictures[4]) form.append('image_four', formData.pictures[4]);
+
+  try {
+    const response = await fetch('http://localhost:8000/api/submitProduct', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+      },
+      body: form,
+    });
+
+    const data = await response.json();
+    console.log('Server response:', data);
+  } catch (error) {
+    console.error('Submit error:', error);
+  }
+};
 
   return (
     <div className="font-sans pt-20">
@@ -128,8 +160,8 @@ const Formula = () => {
                   <label className="block text-black text-sm font-medium mb-1">Brand:</label>
                   <input
                     type="text"
-                    name="breed"
-                    value={formData.breed}
+                    name="brand"
+                    value={formData.brand}
                     onChange={handleChange}
                     className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
                   />
@@ -198,7 +230,7 @@ const Formula = () => {
                   value={formData.descriptionChart}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-3 py-4 text-white border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                  className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
                 />
               </div>
               
@@ -209,7 +241,7 @@ const Formula = () => {
                   value={formData.descriptionLine}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-3 py-4 text-white border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
+                  className="w-full px-3 py-4 text-[#8B8B8B] border border-gray-300 rounded-4xl focus:outline-none focus:ring-2 focus:ring-[#EBD7BF]"
                 />
               </div>
             </div>

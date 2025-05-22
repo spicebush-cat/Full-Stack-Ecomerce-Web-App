@@ -16,12 +16,43 @@ function product() {
   const quentity = 0;
   const [productData, setProductData] = useState({});
   //her we search for the id of the product that we click the display
-  const fetchProductData = () => {
-    const prod = products.find((item) => item._id === productId);
-    if (prod) {
-      setProductData(prod);
+const fetchProductData = async () => {
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/api/productdetails/${productId}`);
+    const data = await response.json();
+
+    if (data.productDetails && data.productDetails.length > 0) {
+      const prod = data.productDetails[0];
+
+      // Match with product_list using product_code
+      const matchedProduct = products.find(p => p.product_code === prod.product_code);
+
+      setProductData({
+        _id: prod.id,
+        product_code: prod.product_code,
+        name: matchedProduct?.name || `Product ${prod.product_code}`,
+        image: matchedProduct?.image || prod.image_one, // fallback if not in list
+        image1: prod.image_one,
+        image2: prod.image_two,
+        image3: prod.image_three,
+        image4: prod.image_four,
+        description: prod.short_description || "",
+        longDescription: prod.long_description || "",
+        price: matchedProduct?.price || 0,
+        sizes: prod.size?.split(",") || [],
+        category: matchedProduct?.category || "N/A",
+        subCategory: matchedProduct?.subCategory || "N/A",
+      });
+    } else {
+      console.error("No product details found");
     }
-  };
+  } catch (error) {
+    console.error("Error fetching product data:", error);
+  }
+};
+
+
+
   //her wh serch for realeated product to appear it
   const [RelatedProducts, setRelatedProducts] = useState([]);
 
@@ -61,20 +92,48 @@ function product() {
     <div className="flex flex-col gap-8 pt-9 pb-8">
       {/* first element */}
       <div className="grid  sm:grid-cols-[1.5fr_5fr_7fr] flex-col  justify-between sm:justify-normal ">
-        <div>
+        {/* <div>
           <img
             src={productData.image}
-            alt="first-img"
+            alt="zero-img"
             className=" pt-4 sm:pt-0 sm:pr-4"
           />
-        </div>
+        </div> */}
         <div>
           <img
-            src={productData.image}
-            alt="secend-img "
+            src={productData.image1}
+            alt="first-img"
+            className="pt-4 sm:pt-0 sm:pr-4"
+          />
+           <img
+            src={productData.image3}
+            alt="third-img"
+            className="pt-4 sm:pt-0 sm:pr-6 hidden sm:block "
+          />
+           <img
+            src={productData.image3}
+            alt="third-img"
             className="pt-4 sm:pt-0 sm:pr-6 hidden sm:block "
           />
         </div>
+          <div>
+          <img
+            src={productData.image2}
+            alt="second-img"
+            className="pt-4 sm:pt-0 sm:pr-4 "
+          />
+          
+        </div>
+          {/* <div>
+         
+        </div>
+          <div>
+          <img
+            src={productData.image4}
+            alt="forth-img"
+            className="pt-4 sm:pt-0 sm:pr-6 hidden sm:block "
+          />
+        </div> */}
         <div className="flex flex-col ml-4 gap-6 items-start justify-center ">
           <div>
             <p className="text-2xl pb-3">{productData.name}</p>

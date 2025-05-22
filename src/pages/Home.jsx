@@ -16,10 +16,10 @@ function Home() {
       <Hero />
       <LatestCollection />
       <BestSeller />
-
+      <HeroCollection />
        <Category />
 
-      <HeroCollection />
+     
 
       <OurPlicy />
       {/* <NewsLatterBox/> */}
