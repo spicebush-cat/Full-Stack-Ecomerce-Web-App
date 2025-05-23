@@ -54,33 +54,33 @@ function App() {
           <Route
             path="/card"
             element={
-              <ProtectedRoute>
+             
                 <Card />
-              </ProtectedRoute>
+             
             }
           />
           <Route
             path="/PlaceOrder"
             element={
-              <ProtectedRoute>
+              
                 <PlaceOrder />
-              </ProtectedRoute>
+             
             }
           />
           <Route
             path="/favorits"
             element={
-              <ProtectedRoute>
+             
                 <Favorits />
-              </ProtectedRoute>
+          
             }
           />
           <Route
             path="/orders"
             element={
-              <ProtectedRoute>
+              
                 <Order />
-              </ProtectedRoute>
+           
             }
           />
         </Routes>
