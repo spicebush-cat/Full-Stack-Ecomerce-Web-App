@@ -19,6 +19,7 @@ import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import { Shopprovider } from "./context/ShopContext"; // ✅ import Shopprovider
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Favorits from "./pages/Favorits";
@@ -26,66 +27,60 @@ import Favorits from "./pages/Favorits";
 function App() {
   return (
     <AuthProvider>
-      <div className="flex flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen">
-        <ToastContainer />
-        <NavBar />
-        <SearchBar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/collection" element={<Collection />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/form" element={<Formula />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/product/:productId" element={<Product />} />
-          <Route path="/category" element={<Category />} />
-          <Route path="/category/:categoryName" element={<CategoryDetail />} />
-          
-          {/* Protected Routes */}
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/card"
-            element={
-             
+      <Shopprovider> {/* ✅ Wrap the app with Shopprovider */}
+        <div className="flex flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen">
+          <ToastContainer />
+          <NavBar />
+          <SearchBar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/collection" element={<Collection />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/form" element={<Formula />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/product/:productId" element={<Product />} />
+            <Route path="/category" element={<Category />} />
+            <Route path="/category/:categoryName" element={<CategoryDetail />} />
+            
+            {/* Protected Routes */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/card"
+              element={
                 <Card />
-             
-            }
-          />
-          <Route
-            path="/PlaceOrder"
-            element={
-              
+              }
+            />
+            <Route
+              path="/PlaceOrder"
+              element={
                 <PlaceOrder />
-             
-            }
-          />
-          <Route
-            path="/favorits"
-            element={
-             
+              }
+            />
+            <Route
+              path="/favorits"
+              element={
                 <Favorits />
-          
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              
+              }
+            />
+            <Route
+              path="/orders"
+              element={
                 <Order />
-           
-            }
-          />
-        </Routes>
-        <Footer />
-      </div>
+              }
+            />
+          </Routes>
+          <Footer />
+        </div>
+      </Shopprovider>
     </AuthProvider>
   );
 }

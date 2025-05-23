@@ -6,7 +6,7 @@ import { ShopContext } from "../context/ShopContext"; // adjust if needed
 
 function Product() {
   const { productId } = useParams();
-  const { card, setCard } = useContext(ShopContext);
+  const { card, setCard, addToFavorites, isProductFavorite } = useContext(ShopContext);
 
   const [productData, setProductData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -189,9 +189,7 @@ function Product() {
       <div className="flex flex-row gap-8 items-start">
         {/* Gallery & More Details */}
         <div className="flex flex-col" style={{ minWidth: 400, maxWidth: 500, flex: 1 }}>
-          <ImageGallery
-            {...galleryProps}
-          />
+          <ImageGallery {...galleryProps} />
           <div className="mt-4 text-gray-700">
             <div className="font-semibold text-base mb-1">More Details</div>
             <div style={{ whiteSpace: "pre-line" }}>
@@ -304,12 +302,38 @@ function Product() {
             >
               ORDER NOW
             </button>
+            {/* Modified Favorite Button */}
             <button
-              className="border px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-pink-500 rounded"
-              onClick={() => alert("Added to favourites!")}
+              className={`border px-4 py-3 font-light transition-all ease-in-out text-sm rounded flex items-center justify-center ${
+                isProductFavorite(productData._id)
+                  ? 'bg-gray-100 text-black'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-black'
+              }`}
+              onClick={() => addToFavorites({
+                _id: productData._id,
+                name: productData.name,
+                price: productData.specialPrice || productData.price,
+                image: productData.images[0]?.original,
+              })}
               type="button"
+              style={{
+                width: '40px',
+                height: '40px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
             >
-              ♥
+              <span
+                style={{
+                  position: 'absolute',
+                  fontSize: '24px',
+                  transition: 'transform 0.3s ease, color 0.3s ease',
+                  transform: isProductFavorite(productData._id) ? 'scale(1.2)' : 'scale(1)',
+                  color: isProductFavorite(productData._id) ? '#000000' : 'inherit'
+                }}
+              >
+                ♥
+              </span>
             </button>
           </div>
         </div>
@@ -347,4 +371,4 @@ function Product() {
   );
 }
 
-export default Product; 
+export default Product;
