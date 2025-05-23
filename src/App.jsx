@@ -37,6 +37,7 @@ function App() {
         <Route path="/form" element={<Formula/>} />
         <Route path="/about" element={<About />} />
         <Route path="/card" element={<Card />} />
+        <Route path="/PlaceOrder" element={<PlaceOrder />} />
         <Route path="/favorits" element={<Favorits />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
-
+import {  Link } from "react-router-dom"
 const Footer = () => {
   return (
     <footer>
@@ -25,7 +25,7 @@ const Footer = () => {
           <ul className="text-gray-600 text-sm space-y-1">
             <li className="hover:text-gray-900">Home</li>
             <li className="hover:text-gray-900">About Us</li>
-            <li className="hover:text-gray-900">Delivery</li>
+           <li className="hover:text-gray-900"><Link to='/PlaceOrder'> Delivery</Link></li>
             <li className="hover:text-gray-900">Privacy Policy</li>
           </ul>
         </div>

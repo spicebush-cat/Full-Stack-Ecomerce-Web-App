@@ -6,8 +6,6 @@ import ProductItem from "../components/ProductItem";
 import { toast } from "react-toastify";
 
 function product() {
-  
- 
   const [active, setActive] = useState(true);
   const [clickNum, setClickNum] = useState(0);
   const { card, setCard, products, currency, cardlength, setCardLength } =
