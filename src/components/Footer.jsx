@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-<<<<<<< HEAD
+import { NavLink, Link } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
-import {  Link } from "react-router-dom"
-=======
 
->>>>>>> f24043916f42ba684f180b0d85945438ef967f61
 const Footer = () => {
   const [info, setInfo] = useState(null);
 
@@ -45,17 +41,18 @@ const Footer = () => {
         <div className="flex flex-col gap-7">
           <h2 className="text-lg font-semibold text-gray-800">Company</h2>
           <ul className="text-gray-600 text-sm space-y-1">
-<<<<<<< HEAD
-            <li className="hover:text-gray-900">Home</li>
-            <li className="hover:text-gray-900">About Us</li>
-           <li className="hover:text-gray-900"><Link to='/PlaceOrder'> Delivery</Link></li>
-            <li className="hover:text-gray-900">Privacy Policy</li>
-=======
-            <li>Home</li>
-            <li>About Us</li>
-            <li>Delivery</li>
-            <li>Privacy Policy</li>
->>>>>>> f24043916f42ba684f180b0d85945438ef967f61
+            <li className="hover:text-gray-900">
+              <Link to="/">Home</Link>
+            </li>
+            <li className="hover:text-gray-900">
+              <Link to="/about">About Us</Link>
+            </li>
+            <li className="hover:text-gray-900">
+              <Link to="/PlaceOrder">Delivery</Link>
+            </li>
+            <li className="hover:text-gray-900">
+              <Link to="/privacy">Privacy Policy</Link>
+            </li>
           </ul>
         </div>
 
