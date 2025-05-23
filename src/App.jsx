@@ -7,53 +7,87 @@ import About from "./pages/About";
 import Card from "./pages/card";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
 import Formula from "./pages/Formula";
 import PlaceOrder from "./pages/PlaceOrder";
 import Product from "./pages/product";
 import Order from "./pages/Order";
-import Category from "./components/Category"; // Confirm path is correct
+import Profile from "./pages/Profile";
+import Category from "./components/Category";
 import CategoryDetail from "./pages/CategoryDetail";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Favorits from "./pages/Favorits";
 
-
 function App() {
   return (
-   
-
-    <div className=" flex  flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen   ">
-      <ToastContainer/>
-      <NavBar />
-      <SearchBar/>
-      <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route path="/collection" element={<Collection/>} />
-        <Route path="/contact" element={<Contact/>} />
-        <Route path="/form" element={<Formula/>} />
-        <Route path="/about" element={<About />} />
-        <Route path="/card" element={<Card />} />
-        <Route path="/favorits" element={<Favorits />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/place-order" element={<PlaceOrder />} />
-        <Route path="/product/:productId" element={<Product />} />
-        <Route path="/orders" element={<Order />} />
-        {/* Category routes */}
-        <Route path="/category" element={<Category />} />
-        <Route path="/category/:categoryName" element={<CategoryDetail />} />
-      </Routes>
-      <Footer />
-    </div>
+    <AuthProvider>
+      <div className="flex flex-col px-3 sm:px-[5vw] md:px-[7vw] lg:px-[8vw] h-screen">
+        <ToastContainer />
+        <NavBar />
+        <SearchBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/collection" element={<Collection />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/form" element={<Formula />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/product/:productId" element={<Product />} />
+          <Route path="/category" element={<Category />} />
+          <Route path="/category/:categoryName" element={<CategoryDetail />} />
+          
+          {/* Protected Routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/card"
+            element={
+              <ProtectedRoute>
+                <Card />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/PlaceOrder"
+            element={
+              <ProtectedRoute>
+                <PlaceOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/favorits"
+            element={
+              <ProtectedRoute>
+                <Favorits />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <Order />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
-
-
-      
-  
 
 export default App;

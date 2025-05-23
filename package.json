@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "axios": "^1.9.0",
+<<<<<<< HEAD
     "photoswipe": "^5.4.4",
+=======
+    "html-react-parser": "^5.2.5",
+>>>>>>> ea816dd0103b2ab2ec84bdde36c3108e591b6202
     "react": "^18.3.1",
     "react-card-flip": "^1.2.3",
     "react-dom": "^18.3.1",

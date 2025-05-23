@@ -14,6 +14,7 @@ export const Shopprovider = ({ children }) => {
     return savedFavorites ? JSON.parse(savedFavorites) : [];
   });
   const [cardlength, setCardLength] = useState(0);
+  const [subTotal, setSubTotal] = useState(0);
   
   const currency = "DA";
   const delevry_fee = 10;
@@ -21,6 +22,12 @@ export const Shopprovider = ({ children }) => {
   // Update cardlength whenever card changes
   useEffect(() => {
     setCardLength(card.length);
+  }, [card]);
+
+  // Calculate subtotal whenever cart changes
+  useEffect(() => {
+    const newSubTotal = card.reduce((total, p) => total + p.productData.price * p.quentity, 0);
+    setSubTotal(newSubTotal);
   }, [card]);
 
   // Save favorites to localStorage whenever it changes
@@ -43,6 +50,10 @@ export const Shopprovider = ({ children }) => {
     return favorites.some(item => item._id === productId);
   };
 
+  const getTotalAmount = () => {
+    return subTotal + delevry_fee;
+  };
+
   const value = {
     products,
     currency,
@@ -57,7 +68,9 @@ export const Shopprovider = ({ children }) => {
     cardlength,
     favorites,
     addToFavorites,
-    isProductFavorite
+    isProductFavorite,
+    subTotal,
+    getTotalAmount
   };
   
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
