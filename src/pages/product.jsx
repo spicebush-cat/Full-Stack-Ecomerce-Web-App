@@ -5,11 +5,11 @@ const productData = {
   price: "DZ",
   description: "ksjdklfjkljskldj",
   images: [
-    { url: "first-img-url", alt: "first-img" },    // principal
-    { url: "second-img-url", alt: "second-img" },  // left top
-    { url: "third-img-url", alt: "third-img" },    // left bottom
-    { url: "fourth-img-url", alt: "fourth-img" },  // bottom left
-    { url: "fifth-img-url", alt: "fifth-img" },    // bottom right
+    { url: "first-img-url", alt: "first-img" },
+    { url: "second-img-url", alt: "second-img" },
+    { url: "third-img-url", alt: "third-img" },
+    { url: "fourth-img-url", alt: "fourth-img" },
+    { url: "fifth-img-url", alt: "fifth-img" },
   ],
   sizes: ["S", "M", "L", "XL"],
   reviews: 122,
@@ -17,68 +17,38 @@ const productData = {
 };
 
 function ProductDetail() {
+  // The first image is the principal one by default
   const [selectedImage, setSelectedImage] = useState(productData.images[0].url);
   const [selectedSize, setSelectedSize] = useState("");
 
-  const PRINCIPAL_SIZE = 320; // px
-
   return (
     <div className="flex flex-col gap-8 pt-9 pb-8">
-      {/* Images and Info Section */}
-      <div className="flex flex-row gap-8">
-        {/* Left Column: Two stacked images */}
-        <div className="flex flex-col gap-2 justify-center">
-          <img
-            src={productData.images[1].url}
-            alt={productData.images[1].alt}
-            style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
-            className={`object-cover border rounded cursor-pointer ${
-              selectedImage === productData.images[1].url ? "border-black" : "border-gray-300"
-            }`}
-            onClick={() => setSelectedImage(productData.images[1].url)}
-          />
-          <img
-            src={productData.images[2].url}
-            alt={productData.images[2].alt}
-            style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
-            className={`object-cover border rounded cursor-pointer ${
-              selectedImage === productData.images[2].url ? "border-black" : "border-gray-300"
-            }`}
-            onClick={() => setSelectedImage(productData.images[2].url)}
-          />
-        </div>
-
-        {/* Center Column: Principal image with two images below */}
+      {/* Images Section */}
+      <div className="grid sm:grid-cols-[7fr_9fr] gap-8">
+        {/* Images (left) */}
         <div className="flex flex-col items-center">
+          {/* Sub Images Row */}
+          <div className="flex gap-2 mb-4">
+            {productData.images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img.url}
+                alt={img.alt}
+                className={`w-16 h-16 object-cover border cursor-pointer rounded
+                  ${selectedImage === img.url ? "border-black" : "border-gray-300"}
+                `}
+                onClick={() => setSelectedImage(img.url)}
+              />
+            ))}
+          </div>
+          {/* Principal Image */}
           <img
             src={selectedImage}
             alt="Selected product"
-            style={{ width: PRINCIPAL_SIZE, height: PRINCIPAL_SIZE }}
-            className="object-cover rounded-lg border"
+            className="w-80 h-80 object-cover rounded-lg border"
           />
-          <div className="flex flex-row gap-2 mt-2">
-            <img
-              src={productData.images[3].url}
-              alt={productData.images[3].alt}
-              style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
-              className={`object-cover border rounded cursor-pointer ${
-                selectedImage === productData.images[3].url ? "border-black" : "border-gray-300"
-              }`}
-              onClick={() => setSelectedImage(productData.images[3].url)}
-            />
-            <img
-              src={productData.images[4].url}
-              alt={productData.images[4].alt}
-              style={{ width: PRINCIPAL_SIZE / 2, height: PRINCIPAL_SIZE / 2 }}
-              className={`object-cover border rounded cursor-pointer ${
-                selectedImage === productData.images[4].url ? "border-black" : "border-gray-300"
-              }`}
-              onClick={() => setSelectedImage(productData.images[4].url)}
-            />
-          </div>
         </div>
-
-        {/* Right Column: Product Info */}
+        {/* Product Info (right) */}
         <div className="flex flex-col gap-6 items-start justify-center">
           <div>
             <p className="text-2xl pb-3">{productData.name}</p>
@@ -127,7 +97,6 @@ function ProductDetail() {
           </button>
         </div>
       </div>
-
       {/* Delivery Info */}
       <div className="flex flex-col w-auto font-light text-gray-400 items-end">
         <p>100% Original product.</p>

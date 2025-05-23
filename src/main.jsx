@@ -10,8 +10,6 @@ createRoot(document.getElementById("root")).render(
     <Shopprovider>
       <App />
     </Shopprovider>
-
-
   </BrowserRouter>
 
 );

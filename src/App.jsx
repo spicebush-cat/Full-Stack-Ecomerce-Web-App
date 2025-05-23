@@ -19,6 +19,7 @@ import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Favorits from "./pages/Favorits";
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
         <Route path="/form" element={<Formula/>} />
         <Route path="/about" element={<About />} />
         <Route path="/card" element={<Card />} />
+        <Route path="/favorits" element={<Favorits />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/place-order" element={<PlaceOrder />} />
