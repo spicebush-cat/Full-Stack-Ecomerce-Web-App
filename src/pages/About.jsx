@@ -8,7 +8,7 @@ import WhyChooseUs from "../components/WhyChooseUs";
 function About() {
   const [aboutHtml, setAboutHtml] = useState("");
 
-  useEffect(() => {
+ useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/allsiteinfo")
       .then(response => {
         const aboutContent = response.data[0]?.about || "";
@@ -17,7 +17,7 @@ function About() {
       .catch(error => {
         console.error("Failed to load About content", error);
       });
-  }, []);
+  }, []); 
 
   return (
     <div className="pb-[130px] pt-5 flex flex-col justify-center items-center gap-y-10">
