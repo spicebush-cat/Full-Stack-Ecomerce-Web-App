@@ -2,13 +2,19 @@ import { NavLink, Link } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
 import { useContext, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
+import { useAuth } from "../context/AuthContext";
 
 const NavBar = () => {
   const { setShowSearch, cardlength, favorites } = useContext(ShopContext);
+  const { user, logout } = useAuth();
   const [visible, setvisible] = useState(false);
   
   const handleSearchClick = () => {
     setShowSearch(true);
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -79,15 +85,23 @@ const NavBar = () => {
           />
           <div className="group-hover:block hidden absolute right-0 pt-3">
             <div className="flex flex-col gap-3 p-1 w-36 rounded-md font-semibold bg-slate-100 text-gray-500">
-              <Link to="/login">
-                <p className="hover:text-black">My Profile</p>
-              </Link>
-              <Link to="/orders">
-                <p className="hover:text-black">Orders</p>
-              </Link>
-              <Link>
-                <p className="hover:text-black">LogOut</p>
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/profile">
+                    <p className="hover:text-black">My Profile</p>
+                  </Link>
+                  <Link to="/orders">
+                    <p className="hover:text-black">Orders</p>
+                  </Link>
+                  <button onClick={handleLogout} className="text-left hover:text-black">
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link to="/login">
+                  <p className="hover:text-black">Login</p>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -194,6 +208,28 @@ const NavBar = () => {
             <p>Favorites</p>
             <hr className="w-full border-none h-[1px] bg-gray-500" />
           </NavLink>
+
+          {user ? (
+            <button
+              onClick={() => {
+                handleLogout();
+                setvisible(!visible);
+              }}
+              className="flex flex-col gap-1 hover:text-white hover:bg-black text-left"
+            >
+              <p>Logout</p>
+              <hr className="w-full border-none h-[1px] bg-gray-500" />
+            </button>
+          ) : (
+            <NavLink
+              onClick={() => setvisible(!visible)}
+              className="flex flex-col gap-1 hover:text-white hover:bg-black"
+              to="/login"
+            >
+              <p>Login</p>
+              <hr className="w-full border-none h-[1px] bg-gray-500" />
+            </NavLink>
+          )}
         </div>
       </div>
     </div>

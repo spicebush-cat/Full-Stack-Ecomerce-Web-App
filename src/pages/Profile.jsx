@@ -1,7 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const { currency } = useContext(ShopContext);
@@ -9,6 +10,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -24,7 +27,7 @@ const Profile = () => {
     phone: user?.phone || '',
     address: user?.address || '',
     wilaya: user?.wilaya || '',
-    avatar: user?.avatar || '/path/to/avatar.jpg'
+    avatar: user?.avatar || 'https://via.placeholder.com/100'
   });
 
   // Mock order history - replace with actual order data from your backend
@@ -49,10 +52,63 @@ const Profile = () => {
     }));
   };
 
+  const handleImageClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      formData.append('userId', user.id);
+
+      const response = await fetch('http://127.0.0.1:8000/api/upload-avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setUserData(prev => ({
+        ...prev,
+        avatar: data.avatarUrl
+      }));
+      toast.success('Profile picture updated successfully');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Replace with your actual API call
       const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
         method: 'POST',
         headers: {
@@ -66,14 +122,16 @@ const Profile = () => {
         throw new Error('Failed to update profile');
       }
 
+      toast.success('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
       console.error('Update profile error:', error);
+      toast.error('Failed to update profile. Please try again.');
     }
   };
 
   if (!user) {
-    return null; // or a loading spinner
+    return null;
   }
 
   const renderProfileInfo = () => (
@@ -98,19 +156,36 @@ const Profile = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-6 mb-6">
-          <img
-            src={userData.avatar || 'https://via.placeholder.com/100'}
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover"
+          <div className="relative group">
+            <img
+              src={userData.avatar}
+              alt="Profile"
+              className={`w-24 h-24 rounded-full object-cover ${isEditing ? 'cursor-pointer' : ''} ${isUploading ? 'opacity-50' : ''}`}
+              onClick={handleImageClick}
+            />
+            {isEditing && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all cursor-pointer"
+                onClick={handleImageClick}
+              >
+                <span className="text-white opacity-0 group-hover:opacity-100">
+                  Change Photo
+                </span>
+              </div>
+            )}
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              </div>
+            )}
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageChange}
           />
-          {isEditing && (
-            <button
-              type="button"
-              className="text-sm text-gray-600 hover:text-gray-800"
-            >
-              Change Photo
-            </button>
-          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

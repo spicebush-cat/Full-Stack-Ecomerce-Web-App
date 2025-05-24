@@ -67,9 +67,10 @@ const Login = () => {
           </div>
 
           <div className="flex justify-between text-sm">
-            <a href="#" className="text-[#414141] hover:underline">
+            <Link to="/forgot-password"  className="text-[#414141] hover:underline">
+           
               Forgot your password?
-            </a>
+            </Link>
             <Link to="/register" className="text-[#414141] hover:underline">
               Create account
             </Link>

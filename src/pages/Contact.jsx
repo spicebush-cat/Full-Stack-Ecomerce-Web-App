@@ -83,7 +83,7 @@ function Contact() {
               <input
                 type="text"
                 name="name"
-                placeholder="Nouara"
+                placeholder="Enter name"
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-1 focus:ring-black"
