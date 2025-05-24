@@ -5,254 +5,95 @@ import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
   const { currency } = useContext(ShopContext);
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('profile');
-  const [isEditing, setIsEditing] = useState(false);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
-  }, [user, navigate]);
+  const [activeTab, setActiveTab] = useState('profile');
+  const [isEditing, setIsEditing]   = useState(false);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState('');
 
   const [userData, setUserData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
-    wilaya: user?.wilaya || '',
-    avatar: user?.avatar || '/path/to/avatar.jpg'
+    name: '',
+    email: '',
+    profile_photo_url: '',
+    // add any extra fields you want to edit
+    phone: '',
+    address: '',
+    wilaya: '',
   });
 
-  // Mock order history - replace with actual order data from your backend
-  const [orderHistory] = useState([
-    {
-      id: '#ORD001',
-      date: '2024-03-20',
-      status: 'Delivered',
-      total: 129.99,
-      items: [
-        { name: 'Classic White T-Shirt', quantity: 1, price: 29.99 },
-        { name: 'Black Jeans', quantity: 1, price: 100.00 }
-      ]
+  // 1️⃣ Fetch user on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return navigate('/login');
     }
-  ]);
+
+    fetch('http://localhost:8000/api/user', {
+      headers: {
+        'Accept':        'application/json',
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+    .then(async res => {
+      if (!res.ok) {
+        throw new Error('Not authenticated');
+      }
+      const body = await res.json();
+      return body.user;
+    })
+    .then(user => {
+      setUserData({
+        name:              user.name || '',
+        email:             user.email || '',
+        profile_photo_url: user.profile_photo_url || '',
+        // if your API returns phone/address/wilaya, map them here:
+        phone:             user.phone || '',
+        address:           user.address || '',
+        wilaya:            user.wilaya || '',
+      });
+    })
+    .catch(() => {
+      navigate('/login');
+    })
+    .finally(() => setLoading(false));
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setUserData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    const token = localStorage.getItem('token');
+
     try {
-      // Replace with your actual API call
-      const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
+      const res = await fetch('http://localhost:8000/api/update-profile', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
+      if (!res.ok) throw new Error('Update failed');
       setIsEditing(false);
-    } catch (error) {
-      console.error('Update profile error:', error);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
-  if (!user) {
-    return null; // or a loading spinner
+  if (loading) {
+    return <p className="text-center py-10">Loading...</p>;
   }
-
-  const renderProfileInfo = () => (
-    <div className="bg-white rounded-lg p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Personal Information</h2>
-        <div className="space-x-4">
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-sm px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
-          >
-            {isEditing ? 'Cancel' : 'Edit Profile'}
-          </button>
-          <button
-            onClick={logout}
-            className="text-sm px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center gap-6 mb-6">
-          <img
-            src={userData.avatar || 'https://via.placeholder.com/100'}
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover"
-          />
-          {isEditing && (
-            <button
-              type="button"
-              className="text-sm text-gray-600 hover:text-gray-800"
-            >
-              Change Photo
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              First Name
-            </label>
-            <input
-              type="text"
-              name="firstName"
-              value={userData.firstName}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              value={userData.lastName}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={userData.email}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={userData.phone}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={userData.address}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Wilaya
-            </label>
-            <input
-              type="text"
-              name="wilaya"
-              value={userData.wilaya}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-            />
-          </div>
-        </div>
-
-        {isEditing && (
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
-        )}
-      </form>
-    </div>
-  );
-
-  const renderOrderHistory = () => (
-    <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h2 className="text-2xl font-semibold mb-6">Order History</h2>
-      <div className="space-y-6">
-        {orderHistory.map((order) => (
-          <div key={order.id} className="border rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="font-medium">Order {order.id}</p>
-                <p className="text-sm text-gray-600">Placed on {order.date}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium">Total</p>
-                <p className="text-lg font-semibold">{currency}{order.total}</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <p>{item.name} x{item.quantity}</p>
-                  <p>{currency}{item.price}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex justify-between items-center">
-              <span className={`px-2 py-1 text-xs rounded ${
-                order.status === 'Delivered' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-              }`}>
-                {order.status}
-              </span>
-              <Link
-                to={`/order/${order.id}`}
-                className="text-sm text-gray-600 hover:text-gray-800"
-              >
-                View Details →
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Tabs */}
       <div className="flex items-center gap-2 text-[#414141] mb-8">
         <p className="font-semibold text-2xl">
           <span className="font-extralight text-gray-500">MY </span> ACCOUNT
@@ -285,7 +126,95 @@ const Profile = () => {
 
         {/* Main Content */}
         <div className="flex-1">
-          {activeTab === 'profile' ? renderProfileInfo() : renderOrderHistory()}
+          {activeTab === 'profile' ? (
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Personal Information</h2>
+                <div className="space-x-4">
+                  <button
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="text-sm px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                  >
+                    {isEditing ? 'Cancel' : 'Edit Profile'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('token');
+                      logout();
+                      navigate('/login');
+                    }}
+                    className="text-sm px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className="mb-4 text-red-500">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex items-center gap-6 mb-6">
+                  <img
+                    src={userData.profile_photo_url || 'https://via.placeholder.com/100'}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                  {isEditing && (
+                    <button
+                      type="button"
+                      className="text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Change Photo
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { label: 'Full Name', name: 'name', type: 'text' },
+                    { label: 'Email',     name: 'email',    type: 'email' },
+                    { label: 'Phone',     name: 'phone',    type: 'tel' },
+                    { label: 'Address',   name: 'address',  type: 'text' },
+                    { label: 'Wilaya',    name: 'wilaya',   type: 'text' },
+                  ].map(field => (
+                    <div key={field.name}>
+                      <label className="block text-sm font-medium mb-1">
+                        {field.label}
+                      </label>
+                      <input
+                        type={field.type}
+                        name={field.name}
+                        value={userData[field.name]}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {isEditing && (
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                )}
+              </form>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold mb-6">Order History</h2>
+              {/* ... your existing order history render ... */}
+            </div>
+          )}
         </div>
       </div>
     </div>
