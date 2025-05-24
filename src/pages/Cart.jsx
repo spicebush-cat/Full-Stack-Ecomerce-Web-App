@@ -8,7 +8,10 @@ const Cart = () => {
 
   useEffect(() => {
     setSubTotal(
-      card.reduce((total, p) => total + p.productData.price * p.quentity, 0)
+      card.reduce((total, p) => {
+        if (!p || !p.productData) return total;
+        return total + p.productData.price * p.quentity;
+      }, 0)
     );
   }, [card]);
 
@@ -22,57 +25,62 @@ const Cart = () => {
       </div>
 
       <div className="flex flex-col gap-5">
-        {card.map((p, index) => (
-          <div key={index} className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row w-full items-center justify-between mt-7">
-              <div className="flex flex-rox gap-5">
-                <img
-                  src={p.productData.image}
-                  alt="img"
-                  className="h-[100px] w-[70px]"
-                />
-                <div className="flex flex-col gap-4">
-                  <p className="font-semibold">{p.productData.name}</p>
-                  <div className="flex flex-row gap-7 font-medium text-gray-600">
-                    <p>
-                      {currency}
-                      {p.productData.price}
-                    </p>
-                    <p className="border-[0.5px] bg-slate-100 px-2">
-                      {p.selectedSize}
-                    </p>
+        {card && card.length > 0 ? (
+          card.map((p, index) => {
+            if (!p || !p.productData) return null;
+            return (
+              <div key={index} className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row w-full items-center justify-between mt-7">
+                  <div className="flex flex-rox gap-5">
+                    <img
+                      src={p.productData.image || "/default-image.png"}
+                      alt={p.productData.name || "Produit"}
+                      className="h-[100px] w-[70px]"
+                    />
+                    <div className="flex flex-col gap-4">
+                      <p className="font-semibold">{p.productData.name || "Nom indisponible"}</p>
+                      <div className="flex flex-row gap-7 font-medium text-gray-600">
+                        <p>
+                          {currency}
+                          {p.productData.price || 0}
+                        </p>
+                        <p className="border-[0.5px] bg-slate-100 px-2">
+                          {p.selectedSize}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                  <input
+                    type="number"
+                    value={p.quentity}
+                    className="border-[0.5px] w-[45px] pl-2 outline-none"
+                    onChange={(e) => {
+                      const updateQuentity = parseInt(e.target.value, 10);
+                      if (updateQuentity >= 1 && updateQuentity <= 7) {
+                        setCard((prevCard) =>
+                          prevCard.map((item, i) =>
+                            i === index ? { ...item, quentity: updateQuentity } : item
+                          )
+                        );
+                      }
+                    }}
+                  />
+                  <img
+                    src={assets.bin_icon}
+                    alt="delete"
+                    className="aspect-square w-6 h-6 cursor-pointer"
+                    onClick={() => {
+                      setCard(card.filter((_, i) => i !== index));
+                    }}
+                  />
                 </div>
+                <hr className="border-[0.5px] text-gray-700" />
               </div>
-              <input
-                type="number"
-                value={p.quentity}
-                className="border-[0.5px] w-[45px] pl-2 outline-none"
-                onChange={(e) => {
-                  const updateQuentity = parseInt(e.target.value, 10);
-                  if (updateQuentity >= 1 && updateQuentity <= 7) {
-                    setCard((prevCard) =>
-                      prevCard.map((item, i) =>
-                        i === index
-                          ? { ...item, quentity: updateQuentity }
-                          : item
-                      )
-                    );
-                  }
-                }}
-              />
-              <img
-                src={assets.bin_icon}
-                alt="delete"
-                className="aspect-square w-6 h-6"
-                onClick={() => {
-                  setCard(card.filter((_, i) => i !== index));
-                }}
-              />
-            </div>
-            <hr className="border-[0.5px] text-gray-700" />
-          </div>
-        ))}
+            );
+          })
+        ) : (
+          <p className="text-center py-10">Votre panier est vide.</p>
+        )}
       </div>
 
       <div className="flex justify-end pt-[50px]">
