@@ -1,0 +1,46 @@
+/* Custom styles for react-slick slider */
+.slick-prev,
+.slick-next {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.slick-prev {
+  left: -5px;
+}
+
+.slick-next {
+  right: -5px;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-size: 24px;
+  opacity: 1;
+}
+
+/* Add padding to prevent cut-off due to absolute positioning */
+.slick-list {
+  margin: 0 20px;
+}
+
+/* Ensure product cards don't get squished */
+.slick-slide > div {
+  margin: 0 10px;
+}
+
+/* Hide arrows on mobile */
+@media (max-width: 640px) {
+  .slick-prev,
+  .slick-next {
+    display: none !important;
+  }
+} 
