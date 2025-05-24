@@ -2,13 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import ProductItem from "./ProductItem";
 import Title from "./Title";
-//nini
-import React, { Component, Fragment } from 'react'
+import React from 'react';
 import { getProductsByRemark } from "../api/productApi";
-import { Link } from 'react-router-dom'
-import AppURL from '../api/AppURL';
 
-//enini
 const BestSeller = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
 
@@ -26,11 +22,12 @@ const BestSeller = () => {
       <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center pt-6">
         {featuredProducts.map((p, index) => (
           <ProductItem
+            key={index}
             name={p.title}
             id={p.id}
             image={p.image}
             price={p.price}
-            key={index}
+            specialPrice={p.special_price || p.specialPrice || null} // Ajout du specialPrice
           />
         ))}
       </div>

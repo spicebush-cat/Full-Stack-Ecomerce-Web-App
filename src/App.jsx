@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import Collection from "./pages/Collection";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
-import Card from "./pages/card";
+import Card from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Formula from "./pages/Formula";

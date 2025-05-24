@@ -14,16 +14,17 @@ const Cart = () => {
 
   return (
     <div className="flex flex-col pt-9 pb-[150px]">
-      <div className="flex items-center gap-2 text-[#414141]   ">
-        <p className="font-semibold text-2xl ">
-          <span className="font-extralight text-gray-500 ">YOUR </span> CART
+      <div className="flex items-center gap-2 text-[#414141]">
+        <p className="font-semibold text-2xl">
+          <span className="font-extralight text-gray-500">YOUR </span> CART
         </p>
         <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
       </div>
-      <div className="flex flex-col gap-5  ">
+
+      <div className="flex flex-col gap-5">
         {card.map((p, index) => (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row w-full items-center justify-between mt-7 ">
+          <div key={index} className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row w-full items-center justify-between mt-7">
               <div className="flex flex-rox gap-5">
                 <img
                   src={p.productData.image}
@@ -59,11 +60,11 @@ const Cart = () => {
                     );
                   }
                 }}
-              ></input>
+              />
               <img
                 src={assets.bin_icon}
-                alt="delet"
-                className=" aspect-square w-6 h-6"
+                alt="delete"
+                className="aspect-square w-6 h-6"
                 onClick={() => {
                   setCard(card.filter((_, i) => i !== index));
                 }}
@@ -73,12 +74,12 @@ const Cart = () => {
           </div>
         ))}
       </div>
-      <div className="flex  justify-end pt-[50px]">
-        <div className="flex flex-col  w-[400px] ">
-          <div className="flex items-center gap-2 text-[#414141]     ">
-            <p className="font-semibold text-2xl ">
-              <span className="font-extralight text-gray-500 ">CART </span>{" "}
-              TOTALS
+
+      <div className="flex justify-end pt-[50px]">
+        <div className="flex flex-col w-[400px]">
+          <div className="flex items-center gap-2 text-[#414141]">
+            <p className="font-semibold text-2xl">
+              <span className="font-extralight text-gray-500">CART </span> TOTALS
             </p>
             <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
           </div>
@@ -87,7 +88,7 @@ const Cart = () => {
               <p>Subtotal</p>
               <p>
                 {currency}
-                {subTotal == 0 ? 0 : subTotal}
+                {subTotal}
               </p>
             </div>
             <hr />
@@ -101,11 +102,14 @@ const Cart = () => {
             <hr />
             <div className="flex justify-between py-1 text-sm font-semibold">
               <p>Total</p>
-              <p>{currency}{subTotal+delevry_fee}</p>
+              <p>
+                {currency}
+                {subTotal + delevry_fee}
+              </p>
             </div>
             <hr />
           </div>
-          <button className="border-[1px]  border-black px-4 py-3 font-light bg-black text-white text-sm w-1/2 self-end ">
+          <button className="border-[1px] border-black px-4 py-3 font-light bg-black text-white text-sm w-1/2 self-end">
             PROCEED TO CHECKOUT
           </button>
         </div>
@@ -113,4 +117,5 @@ const Cart = () => {
     </div>
   );
 };
+
 export default Cart;

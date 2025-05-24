@@ -3,9 +3,9 @@ import { ShopContext } from "../context/ShopContext";
 import { Link } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
 
-const ProductItem = ({ name, image, price, id }) => {
+const ProductItem = ({ name, image, price, specialPrice, id }) => {
   const { currency, addToFavorites, isProductFavorite } = useContext(ShopContext);
-  const product = { name, image, price, _id: id };
+  const product = { name, image, price, specialPrice, _id: id };
   const isFavorite = isProductFavorite(id);
 
   return (
@@ -36,11 +36,24 @@ const ProductItem = ({ name, image, price, id }) => {
         </div>
         <p className="pt-2 pb-1 text-sm font-extralight">{name}</p>
         <p className="font-semibold text-sm">
-          {currency}
-          {price}
+          {specialPrice && specialPrice !== price && specialPrice !== 0 ? (
+            <>
+              <span className="line-through text-gray-400 mr-2">
+                {currency}{price}
+              </span>
+              <span className="text-red-600">
+                {currency}{specialPrice}
+              </span>
+            </>
+          ) : (
+            <span>
+              {currency}{price}
+            </span>
+          )}
         </p>
       </Link>
     </div>
   );
 };
+
 export default ProductItem;

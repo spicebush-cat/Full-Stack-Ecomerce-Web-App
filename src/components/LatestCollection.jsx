@@ -23,6 +23,7 @@ const LatestCollection = () => {
             name={p.title || p.name}
             image={p.image}
             price={p.price}
+            specialPrice={p.special_price || p.specialPrice || null} // Ajout du specialPrice
           />
         ))}
       </div>

@@ -1,39 +1,81 @@
 import { createContext, useState, useEffect } from "react";
 import { products } from "../../public/assets/frontend_assets/assets";
 
-export const ShopContext = createContext(); //this the context will be use in my app and provide it the provider
+export const ShopContext = createContext();
 
 export const Shopprovider = ({ children }) => {
-  //this is what i xill provide to my app
-  //some method and states
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [card, setCard] = useState([]);
+  const [card, setCard] = useState(() => {
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
   const [favorites, setFavorites] = useState(() => {
     const savedFavorites = localStorage.getItem('favorites');
     return savedFavorites ? JSON.parse(savedFavorites) : [];
   });
-  const [cardlength, setCardLength] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
   
   const currency = "DA";
   const delevry_fee = 10;
 
-  // Update cardlength whenever card changes
+  // Update card length and save to localStorage
   useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(card));
     setCardLength(card.length);
   }, [card]);
 
   // Calculate subtotal whenever cart changes
   useEffect(() => {
-    const newSubTotal = card.reduce((total, p) => total + p.productData.price * p.quentity, 0);
+    const newSubTotal = card.reduce((total, item) => total + (item.price || item.productData?.price) * (item.quantity || item.quentity || 1), 0);
     setSubTotal(newSubTotal);
   }, [card]);
 
-  // Save favorites to localStorage whenever it changes
+  // Save favorites to localStorage
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
+
+  const addToCart = (product, quantity = 1, selectedSize = "", selectedColor = "") => {
+    setCard(prevCart => {
+      const existingItem = prevCart.find(item => 
+        item._id === product._id && 
+        item.selectedSize === selectedSize && 
+        item.selectedColor === selectedColor
+      );
+
+      if (existingItem) {
+        return prevCart.map(item =>
+          item._id === product._id &&
+          item.selectedSize === selectedSize &&
+          item.selectedColor === selectedColor
+            ? { 
+                ...item, 
+                quantity: (item.quantity || item.quentity || 0) + quantity 
+              }
+            : item
+        );
+      }
+      
+      return [...prevCart, { 
+        ...product, 
+        quantity,
+        selectedSize, 
+        selectedColor,
+        price: product.price || product.productData?.price
+      }];
+    });
+  };
+
+  const removeFromCart = (productId, selectedSize = "", selectedColor = "") => {
+    setCard(prevCart => 
+      prevCart.filter(item => 
+        !(item._id === productId && 
+          item.selectedSize === selectedSize && 
+          item.selectedColor === selectedColor)
+      )
+    );
+  };
 
   const addToFavorites = (product) => {
     setFavorites(prev => {
@@ -54,6 +96,10 @@ export const Shopprovider = ({ children }) => {
     return subTotal + delevry_fee;
   };
 
+  const setCardLength = (length) => {
+    // This is now handled automatically in the useEffect
+  };
+
   const value = {
     products,
     currency,
@@ -64,8 +110,9 @@ export const Shopprovider = ({ children }) => {
     showSearch,
     card,
     setCard,
-    setCardLength,
-    cardlength,
+    addToCart,
+    removeFromCart,
+    cardlength: card.length, // Now calculated directly
     favorites,
     addToFavorites,
     isProductFavorite,
@@ -74,4 +121,4 @@ export const Shopprovider = ({ children }) => {
   };
   
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
-}
+};

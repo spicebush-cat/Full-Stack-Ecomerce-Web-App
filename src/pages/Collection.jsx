@@ -13,7 +13,7 @@ function Collection() {
   const [availableSubcategories, setAvailableSubcategories] = useState([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState({});
 
-  const { search } = useContext(ShopContext); // ⬅️ Add search from context
+  const { search } = useContext(ShopContext);
 
   // Fetch categories and initialize selectedCategories
   useEffect(() => {
@@ -223,6 +223,7 @@ function Collection() {
                 id={p.id}
                 image={p.image}
                 price={p.price}
+                specialPrice={p.special_price || p.specialPrice || null}
               />
             ))
           ) : (
