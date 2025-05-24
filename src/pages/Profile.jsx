@@ -10,12 +10,17 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  // Redirect to login if not authenticated
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    avatar: 'https://via.placeholder.com/100'
+  });
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -24,52 +29,23 @@ const Profile = () => {
     fetchUserData();
   }, [user, navigate]);
 
-  const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    wilaya: '',
-    avatar: 'https://via.placeholder.com/100'
-  });
-
-  const [orderHistory, setOrderHistory] = useState([]);
-
   const fetchUserData = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/user-profile', {
+      const response = await fetch('http://localhost:8000/api/user', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch user data');
-      }
-
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      
       const data = await response.json();
       setUserData({
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        address: data.address || '',
-        wilaya: data.wilaya || '',
-        avatar: data.avatar || 'https://via.placeholder.com/100'
+        name: data.user.name,
+        email: data.user.email,
+        avatar: data.user.profile_photo_url || 'https://via.placeholder.com/100'
       });
 
-      // Fetch order history
-      const ordersResponse = await fetch('http://127.0.0.1:8000/api/user-orders', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
-
-      if (ordersResponse.ok) {
-        const ordersData = await ordersResponse.json();
-        setOrderHistory(ordersData);
-      }
     } catch (error) {
       console.error('Error fetching user data:', error);
       toast.error('Failed to load profile data');
@@ -80,41 +56,43 @@ const Profile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setUserData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleImageClick = () => {
-    if (isEditing && !isUploading) {
-      fileInputRef.current?.click();
-    }
+    if (isEditing) fileInputRef.current?.click();
   };
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size should be less than 5MB');
       return;
     }
 
-    setIsUploading(true);
+    const imageUrl = URL.createObjectURL(file);
+    setUserData(prev => ({ ...prev, avatar: imageUrl }));
+    setSelectedFile(file);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
     try {
       const formData = new FormData();
-      formData.append('avatar', file);
-      formData.append('userId', user.id);
+      formData.append('name', userData.name);
+      formData.append('email', userData.email);
+      if (selectedFile) formData.append('profile_photo', selectedFile);
 
-      const response = await fetch('http://127.0.0.1:8000/api/upload-avatar', {
+      const response = await fetch('http://localhost:8000/api/user/profile/update', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -122,46 +100,24 @@ const Profile = () => {
         body: formData
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-
+      if (!response.ok) throw new Error('Failed to update profile');
+      
       const data = await response.json();
       setUserData(prev => ({
         ...prev,
-        avatar: data.avatarUrl
+        name: data.data.name,
+        email: data.data.email,
+        avatar: data.data.profile_photo_path
       }));
-      toast.success('Profile picture updated successfully');
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload image. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify(userData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
+      
+      if (selectedFile) URL.revokeObjectURL(userData.avatar);
+      setSelectedFile(null);
       toast.success('Profile updated successfully');
       setIsEditing(false);
+      
     } catch (error) {
-      console.error('Update profile error:', error);
-      toast.error('Failed to update profile. Please try again.');
+      console.error('Update error:', error);
+      toast.error('Failed to update profile');
     } finally {
       setIsSaving(false);
     }
@@ -191,7 +147,6 @@ const Profile = () => {
           </button>
           <button
             onClick={logout}
-            disabled={isSaving}
             className={`text-sm px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors ${
               isSaving ? 'opacity-50 cursor-not-allowed' : ''
             }`}
@@ -207,7 +162,7 @@ const Profile = () => {
             <img
               src={userData.avatar}
               alt="Profile"
-              className={`w-24 h-24 rounded-full object-cover ${isEditing ? 'cursor-pointer' : ''} ${isUploading ? 'opacity-50' : ''}`}
+              className={`w-24 h-24 rounded-full object-cover ${isEditing ? 'cursor-pointer' : ''}`}
               onClick={handleImageClick}
             />
             {isEditing && (
@@ -218,11 +173,6 @@ const Profile = () => {
                 <span className="text-white opacity-0 group-hover:opacity-100">
                   Change Photo
                 </span>
-              </div>
-            )}
-            {isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
               </div>
             )}
           </div>
@@ -238,26 +188,12 @@ const Profile = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              First Name
+              Name
             </label>
             <input
               type="text"
-              name="firstName"
-              value={userData.firstName}
-              onChange={handleInputChange}
-              disabled={!isEditing || isSaving}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              value={userData.lastName}
+              name="name"
+              value={userData.name}
               onChange={handleInputChange}
               disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
@@ -278,48 +214,6 @@ const Profile = () => {
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={userData.phone}
-              onChange={handleInputChange}
-              disabled={!isEditing || isSaving}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={userData.address}
-              onChange={handleInputChange}
-              disabled={!isEditing || isSaving}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Wilaya
-            </label>
-            <input
-              type="text"
-              name="wilaya"
-              value={userData.wilaya}
-              onChange={handleInputChange}
-              disabled={!isEditing || isSaving}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
-              required
-            />
-                      </div>
         </div>
 
         {isEditing && (
@@ -339,55 +233,6 @@ const Profile = () => {
     </div>
   );
 
-  const renderOrderHistory = () => (
-    <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h2 className="text-2xl font-semibold mb-6">Order History</h2>
-      {orderHistory.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <p>No orders found</p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {orderHistory.map((order) => (
-            <div key={order.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <p className="font-medium">Order {order.id}</p>
-                  <p className="text-sm text-gray-600">Placed on {order.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">Total</p>
-                  <p className="text-lg font-semibold">{currency}{order.total}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm">
-                    <p>{item.name} x{item.quantity}</p>
-                    <p>{currency}{item.price}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 flex justify-between items-center">
-                <span className={`px-2 py-1 text-xs rounded ${
-                  order.status === 'Delivered' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {order.status}
-                </span>
-                <Link
-                  to={`/order/${order.id}`}
-                  className="text-sm text-gray-600 hover:text-gray-800"
-                >
-                  View Details →
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center gap-2 text-[#414141] mb-8">
@@ -398,7 +243,6 @@ const Profile = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar */}
         <div className="md:w-64">
           <div className="bg-white rounded-lg shadow-sm">
             <button
@@ -420,9 +264,8 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="flex-1">
-          {activeTab === 'profile' ? renderProfileInfo() : renderOrderHistory()}
+          {activeTab === 'profile' ? renderProfileInfo() : <div className="bg-white rounded-lg p-6 shadow-sm">Order History (Implement your order history component here)</div>}
         </div>
       </div>
     </div>
