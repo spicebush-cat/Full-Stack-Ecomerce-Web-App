@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Title from "./Title";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "../styles/slider.css";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -20,8 +24,44 @@ const Category = () => {
       });
   }, []);
 
+  const settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    arrows: true,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        }
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        }
+      }
+    ]
+  };
+
   if (loading) {
-    return <div className="text-center py-10 text-lg">Loading categories...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    );
   }
 
   return (
@@ -30,29 +70,32 @@ const Category = () => {
         <Title text1="OUR" text2="CATEGORIES" />
       </div>
 
-      <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center pt-6">
-        {categories.map((categoryObj, index) => {
-          const categoryName = categoryObj.category_name;
+      <div className="px-4">
+        <Slider {...settings}>
+          {categories.map((categoryObj, index) => {
+            const categoryName = categoryObj.category_name;
 
-          return (
-            <div
-              key={index}
-              className="w-full max-w-[200px] cursor-pointer"
-              onClick={() => navigate(`/category/${categoryName}`)}
-            >
-              <div className="w-full h-[200px] overflow-hidden rounded-xl shadow-md">
-                <img
-                  src={categoryObj.category_image}
-                  alt={categoryName}
-                  className="w-full h-full object-cover"
-                />
+            return (
+              <div key={index} className="px-3">
+                <div
+                  className="w-full cursor-pointer"
+                  onClick={() => navigate(`/category/${categoryName}`)}
+                >
+                  <div className="w-full h-[200px] overflow-hidden rounded-xl shadow-md">
+                    <img
+                      src={categoryObj.category_image}
+                      alt={categoryName}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <p className="text-center text-lg font-semibold mt-3 capitalize">
+                    {categoryName}
+                  </p>
+                </div>
               </div>
-              <p className="text-center text-lg font-semibold mt-3 capitalize">
-                {categoryName}
-              </p>
-            </div>
-          );
-        })}
+            );
+          })}
+        </Slider>
       </div>
     </div>
   );
