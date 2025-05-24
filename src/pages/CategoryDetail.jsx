@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ProductItem from "../components/ProductItem";
 
 const CategoryDetail = () => {
   const { categoryName } = useParams();
@@ -8,8 +9,8 @@ const CategoryDetail = () => {
   const [productsByCategory, setProductsByCategory] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch category info
   useEffect(() => {
-    // Fetch all categories and find the one matching categoryName
     fetch("http://127.0.0.1:8000/api/allcategory")
       .then((res) => res.json())
       .then((data) => {
@@ -23,26 +24,29 @@ const CategoryDetail = () => {
       });
   }, [categoryName]);
 
+  // Fetch products by subcategory or by category
   useEffect(() => {
     if (!categoryData) return;
 
     if (categoryData.subcategories && categoryData.subcategories.length > 0) {
-      // For each subcategory, fetch products for that subcategory
-      categoryData.subcategories.forEach((subcat) => {
+      const fetches = categoryData.subcategories.map((subcat) =>
         fetch(`http://127.0.0.1:8000/api/productlistbysubcategory/${subcat.subcategory_name}`)
           .then((res) => res.json())
-          .then((products) => {
-            setProductsBySubcategory((prev) => ({
-              ...prev,
-              [subcat.subcategory_name]: products,
-            }));
-          })
+          .then((products) => ({ subcategory: subcat.subcategory_name, products }))
           .catch((error) => {
             console.error(`Error fetching products for ${subcat.subcategory_name}:`, error);
-          });
+            return { subcategory: subcat.subcategory_name, products: [] };
+          })
+      );
+
+      Promise.all(fetches).then((results) => {
+        const productsMap = {};
+        results.forEach(({ subcategory, products }) => {
+          productsMap[subcategory] = products;
+        });
+        setProductsBySubcategory(productsMap);
       });
     } else {
-      // No subcategories: fetch products by category instead
       fetch(`http://127.0.0.1:8000/api/productlistbycategory/${categoryName}`)
         .then((res) => res.json())
         .then((products) => {
@@ -58,52 +62,54 @@ const CategoryDetail = () => {
   if (!categoryData) return <div className="text-center py-10">Category not found.</div>;
 
   return (
-    <div className="py-10">
-      <h2 className="text-center text-3xl font-bold capitalize mb-8">{categoryData.category_name}</h2>
+    <div className="py-10 px-4">
+      <h2 className="text-center text-3xl font-bold capitalize mb-8">
+        {categoryData.category_name}
+      </h2>
 
       {categoryData.subcategories && categoryData.subcategories.length > 0 ? (
-        // Show products grouped by subcategory
         categoryData.subcategories.map((subcat) => (
           <div key={subcat.id} className="mb-10">
             <h3 className="text-2xl font-semibold capitalize mb-4">{subcat.subcategory_name}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center sm:justify-items-start">
               {productsBySubcategory[subcat.subcategory_name] && productsBySubcategory[subcat.subcategory_name].length > 0 ? (
                 productsBySubcategory[subcat.subcategory_name].map((product) => (
-                  <div key={product.id} className="border rounded p-4 shadow hover:shadow-lg cursor-pointer">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-full h-40 object-cover rounded"
-                    />
-                    <h4 className="mt-2 font-semibold">{product.title}</h4>
-                    <p className="text-green-600 font-bold">${product.price}</p>
-                  </div>
+                  <ProductItem
+                    key={product.id}
+                    id={product.id}
+                    name={product.title || product.name}
+                    image={product.image}
+                    price={product.price}
+                    specialPrice={product.special_price || product.specialPrice || null}
+                  />
                 ))
               ) : (
-                <p>No products found for this subcategory.</p>
+                <div className="col-span-full text-center py-10">
+                  <p className="text-lg">No products found for this subcategory.</p>
+                </div>
               )}
             </div>
           </div>
         ))
       ) : (
-        // No subcategories - show products by category
         <>
           {productsByCategory.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center sm:justify-items-start">
               {productsByCategory.map((product) => (
-                <div key={product.id} className="border rounded p-4 shadow hover:shadow-lg cursor-pointer">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="w-full h-40 object-cover rounded"
-                  />
-                  <h4 className="mt-2 font-semibold">{product.title}</h4>
-                  <p className="text-green-600 font-bold">${product.price}</p>
-                </div>
+                <ProductItem
+                  key={product.id}
+                  id={product.id}
+                  name={product.title || product.name}
+                  image={product.image}
+                  price={product.price}
+                  specialPrice={product.special_price || product.specialPrice || null}
+                />
               ))}
             </div>
           ) : (
-            <p className="text-center text-lg">No products found in this category.</p>
+            <div className="col-span-full text-center py-10">
+              <p className="text-lg">No products found in this category.</p>
+            </div>
           )}
         </>
       )}
