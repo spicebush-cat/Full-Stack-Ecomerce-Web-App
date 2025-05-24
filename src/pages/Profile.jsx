@@ -11,38 +11,72 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!user) {
       navigate('/login');
+      return;
     }
+    fetchUserData();
   }, [user, navigate]);
 
   const [userData, setUserData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
-    wilaya: user?.wilaya || '',
-    avatar: user?.avatar || 'https://via.placeholder.com/100'
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    wilaya: '',
+    avatar: 'https://via.placeholder.com/100'
   });
 
-  // Mock order history - replace with actual order data from your backend
-  const [orderHistory] = useState([
-    {
-      id: '#ORD001',
-      date: '2024-03-20',
-      status: 'Delivered',
-      total: 129.99,
-      items: [
-        { name: 'Classic White T-Shirt', quantity: 1, price: 29.99 },
-        { name: 'Black Jeans', quantity: 1, price: 100.00 }
-      ]
+  const [orderHistory, setOrderHistory] = useState([]);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/user-profile', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const data = await response.json();
+      setUserData({
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        address: data.address || '',
+        wilaya: data.wilaya || '',
+        avatar: data.avatar || 'https://via.placeholder.com/100'
+      });
+
+      // Fetch order history
+      const ordersResponse = await fetch('http://127.0.0.1:8000/api/user-orders', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json();
+        setOrderHistory(ordersData);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      toast.error('Failed to load profile data');
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +87,7 @@ const Profile = () => {
   };
 
   const handleImageClick = () => {
-    if (isEditing) {
+    if (isEditing && !isUploading) {
       fileInputRef.current?.click();
     }
   };
@@ -108,6 +142,7 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const response = await fetch('http://127.0.0.1:8000/api/update-profile', {
         method: 'POST',
@@ -127,11 +162,17 @@ const Profile = () => {
     } catch (error) {
       console.error('Update profile error:', error);
       toast.error('Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  if (!user) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    );
   }
 
   const renderProfileInfo = () => (
@@ -141,13 +182,19 @@ const Profile = () => {
         <div className="space-x-4">
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="text-sm px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
+            disabled={isSaving}
+            className={`text-sm px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors ${
+              isSaving ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             {isEditing ? 'Cancel' : 'Edit Profile'}
           </button>
           <button
             onClick={logout}
-            className="text-sm px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+            disabled={isSaving}
+            className={`text-sm px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors ${
+              isSaving ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             Logout
           </button>
@@ -198,8 +245,9 @@ const Profile = () => {
               name="firstName"
               value={userData.firstName}
               onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+              required
             />
           </div>
           <div>
@@ -211,8 +259,9 @@ const Profile = () => {
               name="lastName"
               value={userData.lastName}
               onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+              required
             />
           </div>
           <div>
@@ -224,8 +273,9 @@ const Profile = () => {
               name="email"
               value={userData.email}
               onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+              required
             />
           </div>
           <div>
@@ -237,8 +287,9 @@ const Profile = () => {
               name="phone"
               value={userData.phone}
               onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+              required
             />
           </div>
           <div>
@@ -250,8 +301,9 @@ const Profile = () => {
               name="address"
               value={userData.address}
               onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+              required
             />
           </div>
           <div>
@@ -263,19 +315,23 @@ const Profile = () => {
               name="wilaya"
               value={userData.wilaya}
               onChange={handleInputChange}
-              disabled={!isEditing}
+              disabled={!isEditing || isSaving}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-50"
+              required
             />
-          </div>
+                      </div>
         </div>
 
         {isEditing && (
           <div className="flex justify-end">
             <button
               type="submit"
-              className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
+              disabled={isSaving}
+              className={`px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors ${
+                isSaving ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Save Changes
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         )}
@@ -286,43 +342,49 @@ const Profile = () => {
   const renderOrderHistory = () => (
     <div className="bg-white rounded-lg p-6 shadow-sm">
       <h2 className="text-2xl font-semibold mb-6">Order History</h2>
-      <div className="space-y-6">
-        {orderHistory.map((order) => (
-          <div key={order.id} className="border rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <p className="font-medium">Order {order.id}</p>
-                <p className="text-sm text-gray-600">Placed on {order.date}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium">Total</p>
-                <p className="text-lg font-semibold">{currency}{order.total}</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <p>{item.name} x{item.quantity}</p>
-                  <p>{currency}{item.price}</p>
+      {orderHistory.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <p>No orders found</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {orderHistory.map((order) => (
+            <div key={order.id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <p className="font-medium">Order {order.id}</p>
+                  <p className="text-sm text-gray-600">Placed on {order.date}</p>
                 </div>
-              ))}
+                <div className="text-right">
+                  <p className="text-sm font-medium">Total</p>
+                  <p className="text-lg font-semibold">{currency}{order.total}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {order.items.map((item, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <p>{item.name} x{item.quantity}</p>
+                    <p>{currency}{item.price}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex justify-between items-center">
+                <span className={`px-2 py-1 text-xs rounded ${
+                  order.status === 'Delivered' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {order.status}
+                </span>
+                <Link
+                  to={`/order/${order.id}`}
+                  className="text-sm text-gray-600 hover:text-gray-800"
+                >
+                  View Details →
+                </Link>
+              </div>
             </div>
-            <div className="mt-4 flex justify-between items-center">
-              <span className={`px-2 py-1 text-xs rounded ${
-                order.status === 'Delivered' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-              }`}>
-                {order.status}
-              </span>
-              <Link
-                to={`/order/${order.id}`}
-                className="text-sm text-gray-600 hover:text-gray-800"
-              >
-                View Details →
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
