@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Title from "./Title";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import "../styles/slider.css";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCategories, setVisibleCategories] = useState(5);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,36 +21,8 @@ const Category = () => {
       });
   }, []);
 
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    arrows: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-        }
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        }
-      }
-    ]
+  const showMore = () => {
+    setVisibleCategories(prev => prev + 5);
   };
 
   if (loading) {
@@ -70,33 +39,41 @@ const Category = () => {
         <Title text1="OUR" text2="CATEGORIES" />
       </div>
 
-      <div className="px-4">
-        <Slider {...settings}>
-          {categories.map((categoryObj, index) => {
-            const categoryName = categoryObj.category_name;
+      <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center pt-6">
+        {categories.slice(0, visibleCategories).map((categoryObj, index) => {
+          const categoryName = categoryObj.category_name;
 
-            return (
-              <div key={index} className="px-3">
-                <div
-                  className="w-full cursor-pointer"
-                  onClick={() => navigate(`/category/${categoryName}`)}
-                >
-                  <div className="w-full h-[200px] overflow-hidden rounded-xl shadow-md">
-                    <img
-                      src={categoryObj.category_image}
-                      alt={categoryName}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <p className="text-center text-lg font-semibold mt-3 capitalize">
-                    {categoryName}
-                  </p>
-                </div>
+          return (
+            <div
+              key={index}
+              className="w-full max-w-[200px] cursor-pointer transform transition-transform duration-300 hover:scale-105"
+              onClick={() => navigate(`/category/${categoryName}`)}
+            >
+              <div className="w-full h-[200px] overflow-hidden rounded-xl shadow-md">
+                <img
+                  src={categoryObj.category_image}
+                  alt={categoryName}
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                />
               </div>
-            );
-          })}
-        </Slider>
+              <p className="text-center text-lg font-semibold mt-3 capitalize">
+                {categoryName}
+              </p>
+            </div>
+          );
+        })}
       </div>
+
+      {visibleCategories < categories.length && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={showMore}
+            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+          >
+            Show More
+          </button>
+        </div>
+      )}
     </div>
   );
 };
