@@ -56,10 +56,10 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/card" element={<Card />} />
-              <Route path="/PlaceOrder" element={<PlaceOrder />} />
-              <Route path="/favorits" element={<Favorits />} />
-              <Route path="/orders" element={<Order />} />
+              <Route path="/card" element={<ProtectedRoute><Card /></ProtectedRoute> } />
+              <Route path="/PlaceOrder" element={<ProtectedRoute><PlaceOrder /></ProtectedRoute>} />
+              <Route path="/favorits" element={<ProtectedRoute><Favorits /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><Order /></ProtectedRoute>} />
             </Routes>
           </div>
           <Footer />
