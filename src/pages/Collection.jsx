@@ -223,6 +223,7 @@ function Collection() {
                 id={p.id}
                 image={p.image}
                 price={p.price}
+                specialPrice={p.special_price || p.specialPrice || null}
               />
             ))
           ) : (

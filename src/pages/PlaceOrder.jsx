@@ -1,15 +1,17 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { ShopContext } from "../context/ShopContext";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { assets } from "../../public/assets/frontend_assets/assets";
 
 const PlaceOrder = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
-  const { currency, delevry_fee, subTotal, getTotalAmount, card } = useContext(ShopContext);
+  const { currency, delevry_fee, card } = useContext(ShopContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const directOrderItem = location.state?.directOrderItem;
 
   const [deliveryInfo, setDeliveryInfo] = useState({
     firstName: '',
@@ -20,7 +22,26 @@ const PlaceOrder = () => {
     phone: ''
   });
 
-  // Check authentication and cart
+  // Calculate totals
+  const calculateSubTotal = () => {
+    if (directOrderItem) {
+      // If it's a direct order, only calculate for the single item
+      return directOrderItem.price * directOrderItem.quantity;
+    }
+    // Otherwise calculate for all cart items
+    return card.reduce((total, item) => {
+      const price = item.productData?.price || item.price || 0;
+      const quantity = item.quentity || item.quantity || 1;
+      return total + (price * quantity);
+    }, 0);
+  };
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubTotal();
+    return subtotal + delevry_fee;
+  };
+
+  // Check authentication and cart/order validity
   useEffect(() => {
     if (!user) {
       toast.error("Please login to place an order");
@@ -28,11 +49,11 @@ const PlaceOrder = () => {
       return;
     }
 
-    if (card.length === 0) {
+    if (!directOrderItem && card.length === 0) {
       toast.error("Your cart is empty");
       navigate('/card');
     }
-  }, [user, card, navigate]);
+  }, [user, card, navigate, directOrderItem]);
 
   // Pre-fill delivery info if user data is available
   useEffect(() => {
@@ -65,15 +86,14 @@ const PlaceOrder = () => {
     }
 
     try {
-      // Combine order information
       const orderData = {
         deliveryInfo,
         paymentMethod,
-        items: card,
+        items: directOrderItem ? [directOrderItem] : card,
         totals: {
-          subtotal: subTotal,
+          subtotal: calculateSubTotal(),
           shippingFee: delevry_fee,
-          total: getTotalAmount()
+          total: calculateTotal()
         }
       };
 
@@ -88,14 +108,15 @@ const PlaceOrder = () => {
       // });
 
       toast.success('Order placed successfully!');
-      // You might want to clear the cart here
-      // clearCart();
-      navigate('/orders'); // Navigate to orders page
+      navigate('/orders');
     } catch (error) {
       console.error('Error placing order:', error);
       toast.error('Failed to place order. Please try again.');
     }
   };
+
+  // Get the items to display (either direct order item or cart items)
+  const displayItems = directOrderItem ? [directOrderItem] : card;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
@@ -188,34 +209,40 @@ const PlaceOrder = () => {
           <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
         </div>
 
-        {/* Cart Items */}
+        {/* Items Display */}
         <div className="max-h-[300px] overflow-y-auto mb-6 border rounded-lg">
-          {card.map((item, index) => (
-            <div key={index} className="flex items-center gap-4 p-4 border-b last:border-b-0">
-              <img
-                src={item.productData.image}
-                alt={item.productData.name}
-                className="w-16 h-20 object-cover"
-              />
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.productData.name}</h3>
-                <div className="flex items-center gap-4 text-gray-600 text-sm mt-1">
-                  <span>Size: {item.selectedSize}</span>
-                  <span>Quantity: {item.quentity}</span>
+          {displayItems.map((item, index) => {
+            const itemData = directOrderItem ? item : (item.productData || item);
+            const itemQuantity = item.quantity || item.quentity || 1;
+            const itemPrice = itemData.price || 0;
+            
+            return (
+              <div key={index} className="flex items-center gap-4 p-4 border-b last:border-b-0">
+                <img
+                  src={itemData.image}
+                  alt={itemData.name}
+                  className="w-16 h-20 object-cover"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold">{itemData.name}</h3>
+                  <div className="flex items-center gap-4 text-gray-600 text-sm mt-1">
+                    {item.selectedSize && <span>Size: {item.selectedSize}</span>}
+                    <span>Quantity: {itemQuantity}</span>
+                  </div>
+                  <p className="text-sm font-medium mt-1">
+                    {currency}{itemPrice * itemQuantity}
+                  </p>
                 </div>
-                <p className="text-sm font-medium mt-1">
-                  {currency}{item.productData.price * item.quentity}
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Cart Totals */}
+        {/* Order Totals */}
         <div className="border rounded-lg p-4 mb-6">
           <div className="flex justify-between py-2 text-gray-600">
             <span>Subtotal</span>
-            <span>{currency}{subTotal}</span>
+            <span>{currency}{calculateSubTotal()}</span>
           </div>
           <div className="flex justify-between py-2 text-gray-600">
             <span>Shipping Fee</span>
@@ -223,7 +250,7 @@ const PlaceOrder = () => {
           </div>
           <div className="flex justify-between py-2 font-semibold text-lg border-t mt-2">
             <span>Total</span>
-            <span>{currency}{getTotalAmount()}</span>
+            <span>{currency}{calculateTotal()}</span>
           </div>
         </div>
 
@@ -235,26 +262,7 @@ const PlaceOrder = () => {
           <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
         </div>
         <div className="flex flex-wrap gap-4 mb-6">
-          <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
-            <input
-              type="radio"
-              name="payment"
-              value="PayPal"
-              checked={paymentMethod === "PayPal"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span className="text-blue-950 font-bold">Pay<span className='text-blue-600'>Pal</span></span>
-          </label>
-          <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
-            <input
-              type="radio"
-              name="payment"
-              value="Baridimob"
-              checked={paymentMethod === "Baridimob"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span className="text-blue-900 font-bold">Baridi<span className='text-yellow-400'>mob</span></span>
-          </label>
+      
           <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
             <input
               type="radio"

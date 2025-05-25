@@ -153,8 +153,8 @@ function Product() {
       return;
     }
 
-    // Add to cart first
-    const cartItem = {
+    // Create the order item
+    const orderItem = {
       _id: `${productData._id}-${Date.now()}`,
       productId: productData._id,
       name: productData.name,
@@ -163,12 +163,13 @@ function Product() {
       selectedColor,
       quantity,
       image: productData.images[0]?.original,
+      isDirectOrder: true // Flag to indicate this is a direct order
     };
 
-    addToCart(cartItem);
-    
-    // Navigate to place order
-    navigate("/PlaceOrder");
+    // Navigate to place order with the product data
+    navigate("/PlaceOrder", { 
+      state: { directOrderItem: orderItem }
+    });
   };
 
   const handleAddToFavorites = () => {
