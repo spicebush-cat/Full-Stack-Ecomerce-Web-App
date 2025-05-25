@@ -1,31 +1,44 @@
 import { useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
-import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 import { assets } from "../../public/assets/frontend_assets/assets";
+import { toast } from "react-toastify";
 
 const ProductItem = ({ name, image, price, specialPrice, id }) => {
   const { currency, addToFavorites, isProductFavorite } = useContext(ShopContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const product = { name, image, price, specialPrice, _id: id };
   const isFavorite = isProductFavorite(id);
 
+  const handleFavoriteClick = (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.info("Please login to add items to favorites");
+      navigate("/login");
+      return;
+    }
+    addToFavorites(product);
+  };
+
   return (
     <div className="relative">
-      <button 
-        onClick={(e) => {
-          e.preventDefault();
-          addToFavorites(product);
-        }}
-        className={`absolute top-2 right-2 z-10 p-2 rounded-full bg-white shadow-md transition-all duration-300 ${
-          isFavorite ? 'hover:bg-red-100' : 'hover:bg-gray-100'
-        }`}
-        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-      >
-        <img 
-          src={isFavorite ? assets.bin_icon : assets.heart_icon} 
-          alt={isFavorite ? "remove from favorites" : "add to favorites"} 
-          className="w-5 h-5"
-        />
-      </button>
+      {user && (
+        <button 
+          onClick={handleFavoriteClick}
+          className={`absolute top-2 right-2 z-10 p-2 rounded-full bg-white shadow-md transition-all duration-300 ${
+            isFavorite ? 'hover:bg-red-100' : 'hover:bg-gray-100'
+          }`}
+          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          <img 
+            src={isFavorite ? assets.bin_icon : assets.heart_icon} 
+            alt={isFavorite ? "remove from favorites" : "add to favorites"} 
+            className="w-5 h-5"
+          />
+        </button>
+      )}
       <Link className="text-gray-700 cursor-pointer block" to={`/product/${id}`}>
         <div className="overflow-hidden">
           <img
