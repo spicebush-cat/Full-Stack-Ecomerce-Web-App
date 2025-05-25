@@ -35,7 +35,7 @@ const HeroCollection = () => {
   return (
     <section className="flex flex-col gap-10">
       <div className="container mx-auto">
-        <Title text1="OUR" text2="COLLECTION" /> //grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center
+        <Title text1="OUR" text2="COLLECTION" /> 
         <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6 justify-items-center pt-6">
           {collectionProducts.slice(0, visibleProducts).map((p, idx) => (
             <ProductItem
