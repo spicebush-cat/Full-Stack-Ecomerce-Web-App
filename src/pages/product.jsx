@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 import { ShopContext } from "../context/ShopContext";
+import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 function Product() {
   const { productId } = useParams();
   const { addToCart, addToFavorites, isProductFavorite } = useContext(ShopContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [productData, setProductData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,7 +23,6 @@ function Product() {
   // Ajout des états pour la notation utilisateur
   const [userRating, setUserRating] = useState(0);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
-
   useEffect(() => {
     setLoading(true);
 
@@ -82,6 +85,12 @@ function Product() {
   };
 
   const handleAddToCart = () => {
+    if (!user) {
+      toast.info("Please login to add items to cart");
+      navigate("/login");
+      return;
+    }
+
     const errors = [];
     
     if (productData.sizes.length > 0 && !selectedSize) {
@@ -102,10 +111,9 @@ function Product() {
       return;
     }
 
-    // Create unique cart item with timestamp to allow multiple additions
     const cartItem = {
-      _id: `${productData._id}-${Date.now()}`, // Unique ID with timestamp
-      productId: productData._id, // Keep original product ID
+      _id: `${productData._id}-${Date.now()}`,
+      productId: productData._id,
       name: productData.name,
       price: productData.specialPrice || productData.price,
       selectedSize,
@@ -115,7 +123,31 @@ function Product() {
     };
 
     addToCart(cartItem);
-    alert(`Added ${quantity} x ${productData.name} to cart!`);
+    toast.success(`Added ${quantity} x ${productData.name} to cart!`);
+  };
+
+  const handleOrderNow = () => {
+    if (!user) {
+      toast.info("Please login to place an order");
+      navigate("/login");
+      return;
+    }
+    // Add your order now logic here
+    alert("Order placed!");
+  };
+
+  const handleAddToFavorites = () => {
+    if (!user) {
+      toast.info("Please login to add items to favorites");
+      navigate("/login");
+      return;
+    }
+    addToFavorites({
+      _id: productData._id,
+      name: productData.name,
+      price: productData.specialPrice || productData.price,
+      image: productData.images[0]?.original,
+    });
   };
 
   // Fonction pour soumettre la note utilisateur
@@ -320,27 +352,22 @@ function Product() {
               onClick={handleAddToCart}
               type="button"
             >
-              ADD TO CART
+              {user ? "ADD TO CART" : "LOGIN TO ADD TO CART"}
             </button>
             <button
               className="border px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-green-600 rounded"
-              onClick={() => alert("Order placed!")}
+              onClick={handleOrderNow}
               type="button"
             >
-              ORDER NOW
+              {user ? "ORDER NOW" : "LOGIN TO ORDER"}
             </button>
             <button
               className={`border px-4 py-3 font-light transition-all ease-in-out text-sm rounded flex items-center justify-center ${
-                isProductFavorite(productData._id)
+                user && isProductFavorite(productData._id)
                   ? 'bg-gray-100 text-black'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-black'
               }`}
-              onClick={() => addToFavorites({
-                _id: productData._id,
-                name: productData.name,
-                price: productData.specialPrice || productData.price,
-                image: productData.images[0]?.original,
-              })}
+              onClick={handleAddToFavorites}
               type="button"
               style={{ width: '40px', height: '40px' }}
             >
