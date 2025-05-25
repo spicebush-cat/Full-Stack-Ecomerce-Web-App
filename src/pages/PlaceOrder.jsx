@@ -22,18 +22,19 @@ const PlaceOrder = () => {
     phone: ''
   });
 
-  // Calculate totals
+  // Calculate totals based on order type
   const calculateSubTotal = () => {
     if (directOrderItem) {
-      // If it's a direct order, only calculate for the single item
+      // For direct orders, only calculate the single item
       return directOrderItem.price * directOrderItem.quantity;
+    } else {
+      // For cart orders, calculate all cart items
+      return card.reduce((total, item) => {
+        const price = item.productData?.price || item.price || 0;
+        const quantity = item.quentity || item.quantity || 1;
+        return total + (price * quantity);
+      }, 0);
     }
-    // Otherwise calculate for all cart items
-    return card.reduce((total, item) => {
-      const price = item.productData?.price || item.price || 0;
-      const quantity = item.quentity || item.quantity || 1;
-      return total + (price * quantity);
-    }, 0);
   };
 
   const calculateTotal = () => {
@@ -41,7 +42,7 @@ const PlaceOrder = () => {
     return subtotal + delevry_fee;
   };
 
-  // Check authentication and cart/order validity
+  // Check authentication and order validity
   useEffect(() => {
     if (!user) {
       toast.error("Please login to place an order");
@@ -49,6 +50,7 @@ const PlaceOrder = () => {
       return;
     }
 
+    // Only check cart if this is not a direct order
     if (!directOrderItem && card.length === 0) {
       toast.error("Your cart is empty");
       navigate('/card');
@@ -86,6 +88,7 @@ const PlaceOrder = () => {
     }
 
     try {
+      // Create order data based on order type
       const orderData = {
         deliveryInfo,
         paymentMethod,
@@ -94,7 +97,8 @@ const PlaceOrder = () => {
           subtotal: calculateSubTotal(),
           shippingFee: delevry_fee,
           total: calculateTotal()
-        }
+        },
+        isDirectOrder: !!directOrderItem
       };
 
       // Here you would typically send the order to your backend
@@ -115,7 +119,7 @@ const PlaceOrder = () => {
     }
   };
 
-  // Get the items to display (either direct order item or cart items)
+  // Get the items to display based on order type
   const displayItems = directOrderItem ? [directOrderItem] : card;
 
   return (
@@ -200,7 +204,7 @@ const PlaceOrder = () => {
         </form>
       </div>
 
-      {/* Cart Summary */}
+      {/* Order Summary */}
       <div>
         <div className="flex items-center gap-2 text-[#414141] mb-6">
           <p className="font-semibold text-2xl">
@@ -262,7 +266,6 @@ const PlaceOrder = () => {
           <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
         </div>
         <div className="flex flex-wrap gap-4 mb-6">
-      
           <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
             <input
               type="radio"
