@@ -153,8 +153,8 @@ function Product() {
       return;
     }
 
-    // Add to cart first
-    const cartItem = {
+    // Create the order item
+    const orderItem = {
       _id: `${productData._id}-${Date.now()}`,
       productId: productData._id,
       name: productData.name,
@@ -163,12 +163,13 @@ function Product() {
       selectedColor,
       quantity,
       image: productData.images[0]?.original,
+      isDirectOrder: true // Flag to indicate this is a direct order
     };
 
-    addToCart(cartItem);
-    
-    // Navigate to place order
-    navigate("/PlaceOrder");
+    // Navigate to place order with the product data
+    navigate("/PlaceOrder", { 
+      state: { directOrderItem: orderItem }
+    });
   };
 
   const handleAddToFavorites = () => {
@@ -237,7 +238,7 @@ function Product() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pt-9 pb-8">
+    <div className="flex flex-col gap-8 pt-9 pb-8 px-4 md:px-8">
       {/* Validation Errors */}
       {validationErrors.length > 0 && (
         <div className="fixed top-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 z-50">
@@ -247,8 +248,9 @@ function Product() {
         </div>
       )}
 
-      <div className="flex flex-row gap-8 items-start">
-        <div className="flex flex-col" style={{ minWidth: 400, maxWidth: 500, flex: 1 }}>
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Product Images Section */}
+        <div className="flex flex-col w-full lg:w-[600px]">
           <ImageGallery {...galleryProps} />
           <div className="mt-4 text-gray-700">
             <div className="font-semibold text-base mb-1">More Details</div>
@@ -258,7 +260,8 @@ function Product() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6 items-start justify-start" style={{ minWidth: 300, maxWidth: 400, flex: 1 }}>
+        {/* Product Details Section */}
+        <div className="flex flex-col gap-6 items-start justify-start w-full lg:max-w-[400px]">
           <div>
             <p className="text-2xl font-semibold pb-1">{productData.name}</p>
             <div className="flex flex-row items-center pb-2">
@@ -275,9 +278,9 @@ function Product() {
             <p className="text-gray-600 font-light">{productData.description}</p>
           </div>
 
-          {/* Bloc de notation utilisateur */}
+          {/* User Rating Section */}
           <div className="flex items-center gap-2 mt-2">
-            <span className="font-medium">Votre note :</span>
+            <span className="font-medium">Your rating:</span>
             {[1,2,3,4,5].map((star) => (
               <button
                 key={star}
@@ -286,7 +289,7 @@ function Product() {
                 onClick={() => setUserRating(star)}
                 className="focus:outline-none"
                 style={{ background: "none", border: "none", cursor: ratingSubmitted ? "not-allowed" : "pointer" }}
-                aria-label={`Donner ${star} étoile${star > 1 ? "s" : ""}`}
+                aria-label={`Give ${star} star${star > 1 ? "s" : ""}`}
               >
                 <span
                   style={{
@@ -299,15 +302,15 @@ function Product() {
                 </span>
               </button>
             ))}
-            {ratingSubmitted && <span className="text-green-600 ml-2">Merci pour votre note !</span>}
+            {ratingSubmitted && <span className="text-green-600 ml-2">Thank you for your rating!</span>}
           </div>
           {userRating > 0 && !ratingSubmitted && (
             <button
-              className="ml-4 px-3 py-1 bg-blue-600 text-white rounded"
+              className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               onClick={handleSubmitRating}
               type="button"
             >
-              Envoyer
+              Submit
             </button>
           )}
 
@@ -323,14 +326,16 @@ function Product() {
               <span className="text-3xl font-bold">{productData.price}</span>
             )}
           </div>
+
+          {/* Color Selection */}
           {productData.colors.length > 0 && (
-            <div>
+            <div className="w-full">
               <p className="font-medium mb-1">Select Color</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {productData.colors.map((color, idx) => (
                   <button
                     key={idx}
-                    className={`px-3 py-1.5 border m-1 rounded transition ${
+                    className={`px-3 py-1.5 border rounded transition ${
                       selectedColor === color ? "border-blue-600 bg-blue-100" : "border-gray-200"
                     }`}
                     onClick={() => setSelectedColor(color)}
@@ -343,14 +348,15 @@ function Product() {
             </div>
           )}
 
+          {/* Size Selection */}
           {productData.sizes.length > 0 && (
-            <div>
+            <div className="w-full">
               <p className="font-medium mb-1">Select Size</p>
-              <div>
+              <div className="flex flex-wrap gap-2">
                 {productData.sizes.map((size, idx) => (
                   <button
                     key={idx}
-                    className={`px-3 py-1.5 border m-1 rounded transition ${
+                    className={`px-3 py-1.5 border rounded transition ${
                       selectedSize === size ? "border-red-600 bg-red-100" : "border-gray-200"
                     }`}
                     onClick={() => setSelectedSize(size)}
@@ -363,7 +369,8 @@ function Product() {
             </div>
           )}
 
-          <div>
+          {/* Quantity Selection */}
+          <div className="w-full">
             <p className="font-medium mb-1">Quantity</p>
             <div className="flex items-center gap-2">
               <button
@@ -381,16 +388,17 @@ function Product() {
             </div>
           </div>
 
-          <div className="flex gap-3">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 w-full">
             <button
-              className="border px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-black rounded"
+              className="flex-1 min-w-[120px] border px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-black rounded"
               onClick={handleAddToCart}
               type="button"
             >
               {user ? "ADD TO CART" : "LOGIN TO ADD TO CART"}
             </button>
             <button
-              className="border px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-green-600 rounded"
+              className="flex-1 min-w-[120px] border px-4 py-3 font-light text-black hover:text-white transition-all ease-in-out text-sm hover:bg-green-600 rounded"
               onClick={handleOrderNow}
               type="button"
             >
@@ -412,6 +420,7 @@ function Product() {
         </div>
       </div>
 
+      {/* Reviews Section */}
       <div className="w-full flex justify-center mt-12">
         <div className="max-w-xl w-full">
           <h3 className="text-lg font-semibold mb-4 text-center">Client Reviews</h3>
