@@ -28,7 +28,7 @@ const PlaceOrder = () => {
       return;
     }
 
-    if (card.length === 0) {
+    if (!Array.isArray(card) || card.length === 0) {
       toast.error("Your cart is empty");
       navigate('/card');
     }
@@ -190,7 +190,7 @@ const PlaceOrder = () => {
 
         {/* Cart Items */}
         <div className="max-h-[300px] overflow-y-auto mb-6 border rounded-lg">
-          {card.map((item, index) => (
+          {(Array.isArray(card) ? card : []).filter(item => item && item.productData).map((item, index) => (
             <div key={index} className="flex items-center gap-4 p-4 border-b last:border-b-0">
               <img
                 src={item.productData.image}
@@ -226,7 +226,6 @@ const PlaceOrder = () => {
             <span>{currency}{getTotalAmount()}</span>
           </div>
         </div>
-
         {/* Payment Method */}
         <div className="flex items-center gap-2 text-[#414141] mb-6">
           <p className="font-semibold text-2xl">
@@ -235,26 +234,7 @@ const PlaceOrder = () => {
           <p className="w-8 md:w-11 h-[2px] bg-[#414141]" />
         </div>
         <div className="flex flex-wrap gap-4 mb-6">
-          <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
-            <input
-              type="radio"
-              name="payment"
-              value="PayPal"
-              checked={paymentMethod === "PayPal"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span className="text-blue-950 font-bold">Pay<span className='text-blue-600'>Pal</span></span>
-          </label>
-          <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
-            <input
-              type="radio"
-              name="payment"
-              value="Baridimob"
-              checked={paymentMethod === "Baridimob"}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <span className="text-blue-900 font-bold">Baridi<span className='text-yellow-400'>mob</span></span>
-          </label>
+          
           <label className="flex items-center space-x-2 border px-4 py-2 rounded cursor-pointer hover:bg-gray-50">
             <input
               type="radio"

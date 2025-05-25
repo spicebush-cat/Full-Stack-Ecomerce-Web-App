@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import { products } from "../../public/assets/frontend_assets/assets";
-
+import { AuthContext } from "./AuthContext"; 
 export const ShopContext = createContext();
 
 export const Shopprovider = ({ children }) => {
@@ -78,15 +78,16 @@ export const Shopprovider = ({ children }) => {
   };
 
   const addToFavorites = (product) => {
-    setFavorites(prev => {
-      const isProductInFavorites = prev.some(item => item._id === product._id);
-      if (isProductInFavorites) {
-        return prev.filter(item => item._id !== product._id);
-      } else {
-        return [...prev, product];
-      }
-    });
-  };
+  setFavorites(prev => {
+    const isProductInFavorites = prev.some(item => item._id === product._id);
+    if (isProductInFavorites) {
+      return prev.filter(item => item._id !== product._id);
+    } else {
+      return [...prev, product];
+    }
+  });
+};
+
 
   const isProductFavorite = (productId) => {
     return favorites.some(item => item._id === productId);
