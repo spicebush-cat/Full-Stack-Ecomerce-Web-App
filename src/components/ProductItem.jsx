@@ -10,7 +10,7 @@ const ProductItem = ({ name, image, price, specialPrice, id }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const product = { name, image, price, specialPrice, _id: id };
-  const isFavorite = isProductFavorite(id);
+  const isFavorite = user ? isProductFavorite(id) : false;
 
   const handleFavoriteClick = (e) => {
     e.preventDefault();
@@ -24,21 +24,19 @@ const ProductItem = ({ name, image, price, specialPrice, id }) => {
 
   return (
     <div className="relative">
-      {user && (
-        <button 
-          onClick={handleFavoriteClick}
-          className={`absolute top-2 right-2 z-10 p-2 rounded-full bg-white shadow-md transition-all duration-300 ${
-            isFavorite ? 'hover:bg-red-100' : 'hover:bg-gray-100'
-          }`}
-          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-        >
-          <img 
-            src={isFavorite ? assets.bin_icon : assets.heart_icon} 
-            alt={isFavorite ? "remove from favorites" : "add to favorites"} 
-            className="w-5 h-5"
-          />
-        </button>
-      )}
+      <button 
+        onClick={handleFavoriteClick}
+        className={`absolute top-2 right-2 z-10 p-2 rounded-full bg-white shadow-md transition-all duration-300 ${
+          isFavorite ? 'hover:bg-red-100' : 'hover:bg-gray-100'
+        }`}
+        title={user ? (isFavorite ? "Remove from favorites" : "Add to favorites") : "Login to add to favorites"}
+      >
+        <img 
+          src={isFavorite ? assets.bin_icon : assets.heart_icon} 
+          alt={isFavorite ? "remove from favorites" : "add to favorites"} 
+          className="w-5 h-5"
+        />
+      </button>
       <Link className="text-gray-700 cursor-pointer block" to={`/product/${id}`}>
         <div className="overflow-hidden">
           <img
