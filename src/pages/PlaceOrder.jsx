@@ -1,11 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { ShopContext } from "../context/ShopContext";
+import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { assets } from "../../public/assets/frontend_assets/assets";
 
 const PlaceOrder = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const { currency, delevry_fee, subTotal, getTotalAmount, card } = useContext(ShopContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [deliveryInfo, setDeliveryInfo] = useState({
@@ -17,12 +20,34 @@ const PlaceOrder = () => {
     phone: ''
   });
 
-  // Redirect to cart if cart is empty
-  React.useEffect(() => {
+  // Check authentication and cart
+  useEffect(() => {
+    if (!user) {
+      toast.error("Please login to place an order");
+      navigate('/login');
+      return;
+    }
+
     if (card.length === 0) {
+      toast.error("Your cart is empty");
       navigate('/card');
     }
-  }, [card, navigate]);
+  }, [user, card, navigate]);
+
+  // Pre-fill delivery info if user data is available
+  useEffect(() => {
+    if (user) {
+      setDeliveryInfo(prev => ({
+        ...prev,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        address: user.address || '',
+        wilaya: user.wilaya || '',
+        phone: user.phone || ''
+      }));
+    }
+  }, [user]);
 
   const handleDeliveryInfoChange = (e) => {
     const { name, value } = e.target;
@@ -32,27 +57,44 @@ const PlaceOrder = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!paymentMethod) {
-      alert('Please select a payment method');
+      toast.error('Please select a payment method');
       return;
     }
 
-    // Combine order information
-    const orderData = {
-      deliveryInfo,
-      paymentMethod,
-      items: card,
-      totals: {
-        subtotal: subTotal,
-        shippingFee: delevry_fee,
-        total: getTotalAmount()
-      }
-    };
+    try {
+      // Combine order information
+      const orderData = {
+        deliveryInfo,
+        paymentMethod,
+        items: card,
+        totals: {
+          subtotal: subTotal,
+          shippingFee: delevry_fee,
+          total: getTotalAmount()
+        }
+      };
 
-    console.log('Order submitted:', orderData);
-    // Add your order submission logic here
+      // Here you would typically send the order to your backend
+      // const response = await fetch('your-api-endpoint', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      //   },
+      //   body: JSON.stringify(orderData)
+      // });
+
+      toast.success('Order placed successfully!');
+      // You might want to clear the cart here
+      // clearCart();
+      navigate('/orders'); // Navigate to orders page
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error('Failed to place order. Please try again.');
+    }
   };
 
   return (

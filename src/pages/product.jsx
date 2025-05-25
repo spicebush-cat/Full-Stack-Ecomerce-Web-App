@@ -132,8 +132,43 @@ function Product() {
       navigate("/login");
       return;
     }
-    // Add your order now logic here
-    alert("Order placed!");
+
+    const errors = [];
+    
+    if (productData.sizes.length > 0 && !selectedSize) {
+      errors.push("Please select a size");
+    }
+    
+    if (productData.colors.length > 0 && !selectedColor) {
+      errors.push("Please select a color");
+    }
+    
+    if (quantity < 1) {
+      errors.push("Quantity must be at least 1");
+    }
+
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      setTimeout(() => setValidationErrors([]), 3000);
+      return;
+    }
+
+    // Add to cart first
+    const cartItem = {
+      _id: `${productData._id}-${Date.now()}`,
+      productId: productData._id,
+      name: productData.name,
+      price: productData.specialPrice || productData.price,
+      selectedSize,
+      selectedColor,
+      quantity,
+      image: productData.images[0]?.original,
+    };
+
+    addToCart(cartItem);
+    
+    // Navigate to place order
+    navigate("/PlaceOrder");
   };
 
   const handleAddToFavorites = () => {
